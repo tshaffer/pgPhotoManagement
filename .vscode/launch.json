@@ -16,9 +16,9 @@
         "${workspaceFolder}/dist/**/*.js"
       ],
       "args": [
-        "--job=BuildTakeoutFileMaps",
-        "--parameters=/Volumes/SHAFFEROTO/Data 8-14-2023",
-        "--parameters=pizza.jpg"
+        "--job=ListGoogleAlbums",
+        // "--job=BuildGoogleMediaItemsById",
+        // "--parameters=/Volumes/SHAFFEROTO/Data 8-14-2023"
       ]
     }
   ]

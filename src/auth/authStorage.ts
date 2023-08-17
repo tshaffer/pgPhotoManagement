@@ -10,6 +10,9 @@ export class AuthStorage {
       };
 
       const filePath = this._getTokenFilePath();
+      const dir = path.dirname(filePath);
+      fs.ensureDirSync(dir)
+
       fs.writeFileSync(filePath, JSON.stringify(storedToken, null, 4));
 
       return storedToken;

@@ -1,5 +1,8 @@
 import { Jobs } from './types';
 import { readConfig } from './config';
+import { isArray, isNil } from 'lodash';
+import { buildGoogleMediaItemsById, listGoogleAlbums } from './jobs/googleJobs';
+import { getAllGoogleAlbums } from './controllers/googlePhotos';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
 
@@ -15,10 +18,38 @@ async function main() {
 
   console.log('main invoked');
 
+  const { job, parameters } = getCommandLineArguments(options);
+
   switch (options.job) {
     case Jobs.BuildGoogleMediaItemsById:
       console.log('BuildGoogleMediaItemsById');
-      // await buildGoogleMediaItemsById();
+      if (parameters.length !== 1) {
+        debugger;
+      }
+      await buildGoogleMediaItemsById(parameters[0]);
+      break;
+    case Jobs.ListGoogleAlbums:
+      console.log('ListGoogleAlbums');
+      await listGoogleAlbums();
       break;
   }
 }
+
+const getCommandLineArguments = (options: any) => {
+  if (isNil(options.job)) {
+    debugger;
+  }
+  const parameters: string[] = [];
+  if (isArray(options.parameters)) {
+    for (const parameter of options.parameters) {
+      parameters.push(parameter);
+    }
+  }
+
+  return {
+    job: options.job,
+    parameters
+  };
+}
+
+main();
