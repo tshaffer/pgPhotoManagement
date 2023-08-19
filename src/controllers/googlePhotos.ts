@@ -3,6 +3,7 @@ import request from 'request';
 import { GoogleAlbum, GoogleMediaItem } from "../types";
 import { AuthService } from "../auth";
 import { isArray, isNil } from 'lodash';
+import axios from 'axios';
 
 export const GooglePhotoAPIs = {
   mediaItems: 'https://photoslibrary.googleapis.com/v1/mediaItems',
@@ -175,21 +176,34 @@ const getRequest = async (authService: AuthService, url: string) => {
   const headers = await getHeaders(authService);
 
   return new Promise((resolve, reject) => {
-    request(url, { headers }, (err, resp, body) => {
-      if (err) {
-        return reject(`Error when GET ${url} ${err}`);
+    axios.get(
+      url,
+      {
+        headers,
       }
-      try {
-        body = JSON.parse(body);
-      } catch (err) {
-        return reject(`Error parsing response body ${err}`);
-      }
-      if (!!body.error) {
-        const { code, message, status } = body.error;
-        return reject(`Error _getRequest ${url} ${code} ${message} ${status}`);
-      }
-      resolve(body);
+    )
+    .then( (response) => {
+      const body: any = response.data;
+      return resolve(body);
+    })
+    .catch( (err) => {
+      debugger;
     });
+    // request(url, { headers }, (err, resp, body) => {
+    //   if (err) {
+    //     return reject(`Error when GET ${url} ${err}`);
+    //   }
+    //   try {
+    //     body = JSON.parse(body);
+    //   } catch (err) {
+    //     return reject(`Error parsing response body ${err}`);
+    //   }
+    //   if (!!body.error) {
+    //     const { code, message, status } = body.error;
+    //     return reject(`Error _getRequest ${url} ${code} ${message} ${status}`);
+    //   }
+    //   resolve(body);
+    // });
   });
 };
 
