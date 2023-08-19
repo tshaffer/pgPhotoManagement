@@ -1,8 +1,12 @@
 import { Jobs } from './types';
 import { readConfig } from './config';
 import { isArray, isNil } from 'lodash';
-import { buildGoogleMediaItemsById, googleGetAlbum, googleListAlbums } from './jobs/googleJobs';
-import { getAllGoogleAlbums } from './controllers/googlePhotos';
+import {
+  buildGoogleMediaItemsById,
+  googleGetAlbum,
+  googleListAlbums,
+  addMediaItemsFromSingleTakeout
+} from './jobs';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
 
@@ -39,7 +43,17 @@ async function main() {
       }
       await googleGetAlbum(parameters[0]);
       break;
-
+    case Jobs.AddMediaItemsFromSingleTakeout:
+      console.log('AddMediaItemsFromSingleTakeout');
+      if (parameters.length !== 2) {
+        debugger;
+      }
+      const albumName: string = parameters[0];
+      const takeoutFolder: string = parameters[1];
+      await addMediaItemsFromSingleTakeout(albumName, takeoutFolder);
+      break;
+    default:
+      debugger;
   }
 }
 

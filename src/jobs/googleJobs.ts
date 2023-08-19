@@ -2,11 +2,16 @@ import { isNil } from "lodash";
 
 import { AuthService } from "../auth";
 import { getAuthService } from "../controllers/googlePhotosService";
-import { GoogleMediaItem, GoogleMediaItemsByIdInstance, IdToGoogleMediaItemArray } from "../types";
-import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData } from "../controllers/googlePhotos";
+import { 
+  GoogleAlbum,
+  GoogleMediaItem, 
+  GoogleMediaItemsByIdInstance, 
+  IdToGoogleMediaItemArray 
+} from "../types";
+import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName } from "../controllers/googlePhotos";
 import { writeJsonToFile } from '../utils';
 
-let authService: AuthService;
+export let authService: AuthService;
 
 
 export const buildGoogleMediaItemsById = async (filePath: string) => {
@@ -37,6 +42,29 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
 
 }
 
+export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutFolder: string) => {
+
+  console.log('addMediaItemsFromSingleTakeout');
+  console.log(takeoutFolder);
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  const googleAlbum: GoogleAlbum | null = await getGoogleAlbumDataByName(authService, albumName);
+  console.log(googleAlbum);
+
+  if (!isNil(googleAlbum)) {
+    const albumId: string = googleAlbum.id;
+    
+  }
+  // const fileNames: string[] = fs.readdirSync(takeoutFolder);
+
+  // console.log(fileNames);
+
+}
+
+
 export const googleListAlbums = async () => {
 
   if (isNil(authService)) {
@@ -53,7 +81,8 @@ export const googleGetAlbum = async (id: string) => {
     authService = await getAuthService();
   }
 
-  getGoogleAlbumData(authService, id);
+  const googleAlbum: GoogleAlbum = await getGoogleAlbumData(authService, id);
+  console.log(googleAlbum);
 
 }
 
