@@ -129,3 +129,6 @@ export const getAllGoogleAlbums = async (authService: AuthService, nextPageToken
   console.log(googleAlbums);
 };
 
+export const getGoogleAlbumData = async (authService: AuthService, id: string): Promise<any> => {
+  
+}

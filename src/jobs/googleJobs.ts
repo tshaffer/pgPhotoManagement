@@ -47,3 +47,13 @@ export const listGoogleAlbums = async () => {
 
 }
 
+export const getGoogleAlbumData = async (id: string) => {
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  getAllGoogleAlbums(authService);
+
+}
+

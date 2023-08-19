@@ -16,9 +16,14 @@
         "${workspaceFolder}/dist/**/*.js"
       ],
       "args": [
-        "--job=ListGoogleAlbums",
-        // "--job=BuildGoogleMediaItemsById",
-        // "--parameters=/Volumes/SHAFFEROTO/Data 8-14-2023"
+        
+        // "--job=GetGoogleAlbum",
+        // "--parameters=AEEKk93e3K61r9mYHDoVxCAAuQZlDD_bxOGlYnMDSn45ZpFz9BYZNnOrxfkZu-guCML9AfAq2Avt",
+
+        // "--job=ListGoogleAlbums",
+
+        "--job=BuildGoogleMediaItemsById",
+        "--parameters=/Volumes/SHAFFEROTO/Data 8-17-2023/googleMediaItemsById-2.json"
       ]
     }
   ]
