@@ -3,7 +3,7 @@ import { isNil } from "lodash";
 import { AuthService } from "../auth";
 import { getAuthService } from "../controllers/googlePhotosService";
 import { GoogleMediaItem, GoogleMediaItemsByIdInstance, IdToGoogleMediaItemArray } from "../types";
-import { getAllMediaItemsFromGoogle, getAllGoogleAlbums } from "../controllers/googlePhotos";
+import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData } from "../controllers/googlePhotos";
 import { writeJsonToFile } from '../utils';
 
 let authService: AuthService;
@@ -37,7 +37,7 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
 
 }
 
-export const listGoogleAlbums = async () => {
+export const googleListAlbums = async () => {
 
   if (isNil(authService)) {
     authService = await getAuthService();
@@ -47,13 +47,13 @@ export const listGoogleAlbums = async () => {
 
 }
 
-export const getGoogleAlbumData = async (id: string) => {
+export const googleGetAlbum = async (id: string) => {
 
   if (isNil(authService)) {
     authService = await getAuthService();
   }
 
-  getAllGoogleAlbums(authService);
+  getGoogleAlbumData(authService, id);
 
 }
 

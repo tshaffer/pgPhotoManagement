@@ -31,3 +31,11 @@ export interface GoogleMediaItemsByIdInstance {
   googleMediaItemsById: IdToGoogleMediaItemArray;
 }
 
+export interface GoogleAlbum {
+  id: string;
+  title: string;
+  mediaItemsCount: string;
+  productUrl: string;
+  coverPhotoBaseUrl: string;
+  coverPhotoMediaItemId: string;
+}

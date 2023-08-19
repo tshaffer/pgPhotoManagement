@@ -1,7 +1,7 @@
 import { Jobs } from './types';
 import { readConfig } from './config';
 import { isArray, isNil } from 'lodash';
-import { buildGoogleMediaItemsById, getGoogleAlbumData, listGoogleAlbums } from './jobs/googleJobs';
+import { buildGoogleMediaItemsById, googleGetAlbum, googleListAlbums } from './jobs/googleJobs';
 import { getAllGoogleAlbums } from './controllers/googlePhotos';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
@@ -30,14 +30,14 @@ async function main() {
       break;
     case Jobs.ListGoogleAlbums:
       console.log('ListGoogleAlbums');
-      await listGoogleAlbums();
+      await googleListAlbums();
       break;
     case Jobs.GetGoogleAlbum:
       console.log('GetGoogleAlbum');
       if (parameters.length !== 1) {
         debugger;
       }
-      await getGoogleAlbumData(parameters[0]);
+      await googleGetAlbum(parameters[0]);
       break;
 
   }
