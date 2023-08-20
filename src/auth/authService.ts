@@ -175,50 +175,11 @@ export class AuthService {
         refresh_token: tokenRequest.refresh_token,
       })
       .then((response) => {
-        debugger;
-        console.log(response);
-        return Promise.resolve(response.data.access_token);
+        return Promise.resolve(response.data);
       }, (error) => {
         debugger;
         console.log(error);
       });
-
-    // return axios.post(CREDENTIALS.token_uri, {
-    //   data: {
-    //     form: tokenRequest,
-    //   }
-    // })
-    //   .then((response) => {
-    //     debugger;
-    //     console.log(response);
-    //   }, (error) => {
-    //     debugger;
-    //     console.log(error);
-    //   });
-
-    // return axios.post(CREDENTIALS.token_uri, {
-    //   data: tokenRequest,
-    // })
-    // .then((response) => {
-    //   debugger;
-    //   console.log(response);
-    // }, (error) => {
-    //   debugger;
-    //   console.log(error);
-    // });
-
-    // var bodyFormData = new FormData();
-    // bodyFormData.append('form', tokenRequest);
-    // return axios.post(CREDENTIALS.token_uri, {
-    //   data: bodyFormData
-    // })
-    // .then((response) => {
-    //   debugger;
-    //   console.log(response);
-    // }, (error) => {
-    //   debugger;
-    //   console.log(error);
-    // });
 
     // return new Promise((resolve, reject) => {
     //   request.post(CREDENTIALS.token_uri, {
