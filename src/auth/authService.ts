@@ -1,5 +1,5 @@
 import express from 'express';
-import request from 'request';
+import axios from 'axios';
 import Moment from 'moment';
 import opn from 'open';
 
@@ -166,18 +166,72 @@ export class AuthService {
   }
 
   async _getToken(tokenRequest: any) {
-    return new Promise((resolve, reject) => {
-      request.post(CREDENTIALS.token_uri, {
-        form: tokenRequest
-      }, (err: any, resp: any, body: any) => {
-        if (err) {
-          console.error('getToken error', err);
-          return reject(err);
-        }
-        const authToken = JSON.parse(body);
-        resolve(authToken);
+
+    return axios.post(CREDENTIALS.token_uri,
+      {
+        client_id: tokenRequest.client_id,
+        client_secret: tokenRequest.client_secret,
+        grant_type: tokenRequest.grant_type,
+        refresh_token: tokenRequest.refresh_token,
+      })
+      .then((response) => {
+        debugger;
+        console.log(response);
+        return Promise.resolve(response.data.access_token);
+      }, (error) => {
+        debugger;
+        console.log(error);
       });
-    });
+
+    // return axios.post(CREDENTIALS.token_uri, {
+    //   data: {
+    //     form: tokenRequest,
+    //   }
+    // })
+    //   .then((response) => {
+    //     debugger;
+    //     console.log(response);
+    //   }, (error) => {
+    //     debugger;
+    //     console.log(error);
+    //   });
+
+    // return axios.post(CREDENTIALS.token_uri, {
+    //   data: tokenRequest,
+    // })
+    // .then((response) => {
+    //   debugger;
+    //   console.log(response);
+    // }, (error) => {
+    //   debugger;
+    //   console.log(error);
+    // });
+
+    // var bodyFormData = new FormData();
+    // bodyFormData.append('form', tokenRequest);
+    // return axios.post(CREDENTIALS.token_uri, {
+    //   data: bodyFormData
+    // })
+    // .then((response) => {
+    //   debugger;
+    //   console.log(response);
+    // }, (error) => {
+    //   debugger;
+    //   console.log(error);
+    // });
+
+    // return new Promise((resolve, reject) => {
+    //   request.post(CREDENTIALS.token_uri, {
+    //     form: tokenRequest
+    //   }, (err: any, resp: any, body: any) => {
+    //     if (err) {
+    //       console.error('getToken error', err);
+    //       return reject(err);
+    //     }
+    //     const authToken = JSON.parse(body);
+    //     resolve(authToken);
+    //   });
+    // });
   }
 
 }

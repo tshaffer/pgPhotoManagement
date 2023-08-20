@@ -1,9 +1,8 @@
-import request from 'request';
+import axios from 'axios';
 
 import { GoogleAlbum, GoogleMediaItem } from "../types";
 import { AuthService } from "../auth";
 import { isArray, isNil } from 'lodash';
-import axios from 'axios';
 
 export const GooglePhotoAPIs = {
   mediaItems: 'https://photoslibrary.googleapis.com/v1/mediaItems',
