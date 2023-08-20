@@ -14,6 +14,7 @@ import {
 } from "../types";
 import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle, getMediaItemFromGoogle } from "../controllers/googlePhotos";
 import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, writeJsonToFile } from '../utils';
+import connectDB from "../config/db";
 
 export let authService: AuthService;
 
@@ -52,6 +53,9 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
 export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutFolder: string) => {
 
   console.log('addMediaItemsFromSingleTakeout');
+
+  console.log('connect to db');
+  await connectDB();
 
   console.log(takeoutFolder);
 
