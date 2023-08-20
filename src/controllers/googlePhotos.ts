@@ -64,13 +64,18 @@ export const getAlbumMediaItemsFromGoogle = async (authService: AuthService, alb
 
   do {
 
-    if (nextPageToken != null) {
-      url = `${GooglePhotoAPIs.mediaItems}?pageToken=${nextPageToken}`;
-    }
-
     try {
 
-      const response: any = await getRequest(authService, url);
+      let postData: any = {
+        albumId
+      };
+      if (nextPageToken !== null) {
+        postData = {
+          albumId,
+          pageToken: nextPageToken
+        };
+      }
+      const response: any = await postRequest(authService, url, postData);
 
       console.log(response);
 
@@ -203,7 +208,24 @@ const getRequest = async (authService: AuthService, url: string) => {
   // });
 };
 
-const postRequest = async (authSErvice: AuthService, url: string, data: any) => {
+const postRequest = async (authService: AuthService, url: string, data: any) => {
+
+  const headers = await getHeaders(authService);
+
+  return axios.post(
+    url,
+    data,
+    {
+      headers,
+    })
+    .then((response: any) => {
+      return Promise.resolve(response.data);
+    }).catch((err: Error) => {
+      debugger;
+      console.log('response to axios post: ');
+      console.log('err: ', err);
+      return Promise.reject(err);
+    });
 
 }
 const getHeaders = async (authService: AuthService) => {
