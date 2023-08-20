@@ -174,38 +174,38 @@ const getRequest = async (authService: AuthService, url: string) => {
 
   const headers = await getHeaders(authService);
 
-  return new Promise((resolve, reject) => {
-    axios.get(
-      url,
-      {
-        headers,
-      }
-    )
-    .then( (response) => {
-      const body: any = response.data;
-      return resolve(body);
+  return axios.get(
+    url,
+    {
+      headers,
     })
-    .catch( (err) => {
+    .then((response) => {
+      const body: any = response.data;
+      return Promise.resolve(body);
+    })
+    .catch((err) => {
       debugger;
     });
-    // request(url, { headers }, (err, resp, body) => {
-    //   if (err) {
-    //     return reject(`Error when GET ${url} ${err}`);
-    //   }
-    //   try {
-    //     body = JSON.parse(body);
-    //   } catch (err) {
-    //     return reject(`Error parsing response body ${err}`);
-    //   }
-    //   if (!!body.error) {
-    //     const { code, message, status } = body.error;
-    //     return reject(`Error _getRequest ${url} ${code} ${message} ${status}`);
-    //   }
-    //   resolve(body);
-    // });
-  });
+  // request(url, { headers }, (err, resp, body) => {
+  //   if (err) {
+  //     return reject(`Error when GET ${url} ${err}`);
+  //   }
+  //   try {
+  //     body = JSON.parse(body);
+  //   } catch (err) {
+  //     return reject(`Error parsing response body ${err}`);
+  //   }
+  //   if (!!body.error) {
+  //     const { code, message, status } = body.error;
+  //     return reject(`Error _getRequest ${url} ${code} ${message} ${status}`);
+  //   }
+  //   resolve(body);
+  // });
 };
 
+const postRequest = async (authSErvice: AuthService, url: string, data: any) => {
+
+}
 const getHeaders = async (authService: AuthService) => {
   const authToken = await authService.getToken();
   return {
