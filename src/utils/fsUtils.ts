@@ -28,7 +28,6 @@ export const getJsonFilePaths = async (rootPath: string): Promise<string[]> => {
     },
     function(err, files){
         if (err) throw err;
-        console.log('finished reading files:',files);
         return resolve(files);
     });
   });
@@ -46,7 +45,6 @@ export const getImageFilePaths = (rootPath: string): string[] => {
   }
   return imageFiles;
 }
-
 
 export const getJsonFromFile = async (filePath: string): Promise<any> => {
   const readFileStream: fs.ReadStream = openReadStream(filePath);
