@@ -5,12 +5,22 @@ import { AuthService } from "../auth";
 import { isArray, isNil } from 'lodash';
 
 export const GooglePhotoAPIs = {
+  mediaItem: 'https://photoslibrary.googleapis.com/v1/mediaItems/',
   mediaItems: 'https://photoslibrary.googleapis.com/v1/mediaItems',
   albums: 'https://photoslibrary.googleapis.com/v1/albums',
   album: 'https://photoslibrary.googleapis.com/v1/albums/',
   mediaItemsSearch: 'https://photoslibrary.googleapis.com/v1/mediaItems:search',
   BATCH_GET_LIMIT: 49
 };
+
+export const getMediaItemFromGoogle = async (authService: AuthService, id: string): Promise<GoogleMediaItem> => {
+
+  const url = `${GooglePhotoAPIs.mediaItem}${id}`;
+
+  const googleMediaItem: GoogleMediaItem = await getRequest(authService, url);
+
+  return googleMediaItem;
+}
 
 export const getAllMediaItemsFromGoogle = async (authService: AuthService, nextPageToken: any = null): Promise<GoogleMediaItem[]> => {
 

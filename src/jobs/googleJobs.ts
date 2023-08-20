@@ -12,8 +12,8 @@ import {
   StringToGoogleMediaItem,
   StringToStringLUT
 } from "../types";
-import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle } from "../controllers/googlePhotos";
-import { getImageFilePaths, getJsonFilePaths, isImageFile, writeJsonToFile } from '../utils';
+import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle, getMediaItemFromGoogle } from "../controllers/googlePhotos";
+import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, writeJsonToFile } from '../utils';
 
 export let authService: AuthService;
 
@@ -56,18 +56,18 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   console.log(takeoutFolder);
 
   // retrieve metadata files and image files from takeout folder
-  const metaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
-  const imageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
+  const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
+  const takeoutImageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
 
-  console.log(metaDataFilePaths.length);
-  console.log(imageFilePaths.length);
+  console.log(takeoutMetaDataFilePaths.length);
+  console.log(takeoutImageFilePaths.length);
 
-  const metaDataFilePathsByImageFileName: StringToStringLUT = {};
-  imageFilePaths.forEach((imageFilePath: string) => {
-    const metadataFilePath = imageFilePath + '.json';
-    const indexOfMetaDataFilePath = metaDataFilePaths.indexOf(metadataFilePath);
+  const takeoutMetaDataFilePathsByImageFileName: StringToStringLUT = {};
+  takeoutImageFilePaths.forEach((imageFilePath: string) => {
+    const takeoutMetadataFilePath = imageFilePath + '.json';
+    const indexOfMetaDataFilePath = takeoutMetaDataFilePaths.indexOf(takeoutMetadataFilePath);
     if (indexOfMetaDataFilePath >= 0) {
-      metaDataFilePathsByImageFileName[path.basename(imageFilePath)] = metadataFilePath;
+      takeoutMetaDataFilePathsByImageFileName[path.basename(imageFilePath)] = takeoutMetadataFilePath;
     }
   });
 
@@ -84,22 +84,38 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
 
   // get the list of media items in the specified album
-  const mediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
+  const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
 
   // iterate through each media item in the album.
-  // if it is an image file, see if there is a corresponding entry in the takout
+  // if it is an image file, see if there is a corresponding entry in the takeout folder
   const myLUT: StringToGoogleMediaItem = {};
-  mediaItemsInAlbum.forEach((mediaItemInAlbum: GoogleMediaItem) => {
-    const googleFileName = mediaItemInAlbum.filename;
+  for (const mediaItemInGoogleAlbum of googleMediaItemsInAlbum) {
+    const googleFileName = mediaItemInGoogleAlbum.filename;
     if (isImageFile(googleFileName)) {
-      if (metaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
-        myLUT[googleFileName] = mediaItemInAlbum;
+      if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
+        myLUT[googleFileName] = mediaItemInGoogleAlbum;
+
+        const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
+        const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
+
+        const mediaItem: GoogleMediaItem = await getMediaItemFromGoogle(authService, mediaItemInGoogleAlbum.id);
+        
+        console.log('googleMediaItem from id');
+        console.log(mediaItem);
+        
+        console.log('googleMediaItem from album');
+        console.log(mediaItemInGoogleAlbum);
+
+        console.log('takeoutMetadata');
+        console.log(takeoutMetadata);
+
+        debugger;
       }
     }
-  });
+  }
 
   console.log(myLUT);
-  
+
   debugger;
 }
 
