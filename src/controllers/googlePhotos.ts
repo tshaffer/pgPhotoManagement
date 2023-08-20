@@ -27,9 +27,6 @@ export const getAllMediaItemsFromGoogle = async (authService: AuthService, nextP
     try {
 
       const response: any = await getRequest(authService, url);
-
-      console.log(response);
-
       if (!isNil(response)) {
         if (isArray(response.mediaItems)) {
           response.mediaItems.forEach((mediaItem: GoogleMediaItem) => {
@@ -77,8 +74,6 @@ export const getAlbumMediaItemsFromGoogle = async (authService: AuthService, alb
       }
       const response: any = await postRequest(authService, url, postData);
 
-      console.log(response);
-
       if (!isNil(response)) {
         if (isArray(response.mediaItems)) {
           response.mediaItems.forEach((mediaItem: GoogleMediaItem) => {
@@ -93,8 +88,6 @@ export const getAlbumMediaItemsFromGoogle = async (authService: AuthService, alb
       else {
         console.log('response is nil');
       }
-
-      console.log('number of googleMediaItems: ' + googleMediaItems.length);
 
     } catch (err) {
       nextPageToken = null;
@@ -161,7 +154,6 @@ export const getGoogleAlbumData = async (authService: AuthService, albumId: stri
   const url = `${GooglePhotoAPIs.album}${albumId}`;
 
   const response: any = await getRequest(authService, url);
-  console.log(response);
 
   const { coverPhotoBaseUrl, coverPhotoMediaItemId, id, mediaItemsCount, productUrl, title } = response;
   const googleAlbum: GoogleAlbum = {

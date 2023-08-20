@@ -1,15 +1,19 @@
 import { isNil } from "lodash";
 
+import path from 'path';
+
 import { AuthService } from "../auth";
 import { getAuthService } from "../controllers/googlePhotosService";
-import { 
+import {
   GoogleAlbum,
-  GoogleMediaItem, 
-  GoogleMediaItemsByIdInstance, 
-  IdToGoogleMediaItemArray 
+  GoogleMediaItem,
+  GoogleMediaItemsByIdInstance,
+  IdToGoogleMediaItemArray,
+  StringToGoogleMediaItem,
+  StringToStringLUT
 } from "../types";
 import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle } from "../controllers/googlePhotos";
-import { getImageFilePaths, getJsonFilePaths, writeJsonToFile } from '../utils';
+import { getImageFilePaths, getJsonFilePaths, isImageFile, writeJsonToFile } from '../utils';
 
 export let authService: AuthService;
 
@@ -50,32 +54,53 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   console.log('addMediaItemsFromSingleTakeout');
 
   console.log(takeoutFolder);
+
+  // retrieve metadata files and image files from takeout folder
   const metaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
   const imageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
 
   console.log(metaDataFilePaths.length);
   console.log(imageFilePaths.length);
 
-  debugger;
+  const metaDataFilePathsByImageFileName: StringToStringLUT = {};
+  imageFilePaths.forEach((imageFilePath: string) => {
+    const metadataFilePath = imageFilePath + '.json';
+    const indexOfMetaDataFilePath = metaDataFilePaths.indexOf(metadataFilePath);
+    if (indexOfMetaDataFilePath >= 0) {
+      metaDataFilePathsByImageFileName[path.basename(imageFilePath)] = metadataFilePath;
+    }
+  });
 
   if (isNil(authService)) {
     authService = await getAuthService();
   }
 
-  const googleAlbum: GoogleAlbum | null = await getGoogleAlbumDataByName(authService, albumName);
-  console.log(googleAlbum);
+  // get the google album associated with the specified album name
+  // const googleAlbum: GoogleAlbum | null = await getGoogleAlbumDataByName(authService, albumName);
+  // if (isNil(googleAlbum)) { return };
+  // console.log(googleAlbum);
 
-  if (!isNil(googleAlbum)) {
-    const albumId: string = googleAlbum.id;
-    // const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
+  // const albumId: string = googleAlbum.id;
+  const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
 
-    const data = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
-    debugger;
-  }
-  // const fileNames: string[] = fs.readdirSync(takeoutFolder);
+  // get the list of media items in the specified album
+  const mediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
 
-  // console.log(fileNames);
+  // iterate through each media item in the album.
+  // if it is an image file, see if there is a corresponding entry in the takout
+  const myLUT: StringToGoogleMediaItem = {};
+  mediaItemsInAlbum.forEach((mediaItemInAlbum: GoogleMediaItem) => {
+    const googleFileName = mediaItemInAlbum.filename;
+    if (isImageFile(googleFileName)) {
+      if (metaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
+        myLUT[googleFileName] = mediaItemInAlbum;
+      }
+    }
+  });
 
+  console.log(myLUT);
+  
+  debugger;
 }
 
 

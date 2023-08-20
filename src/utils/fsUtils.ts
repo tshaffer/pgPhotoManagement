@@ -46,6 +46,11 @@ export const getImageFilePaths = (rootPath: string): string[] => {
   return imageFiles;
 }
 
+export const isImageFile = (fileSpec: string): boolean => {
+  const extension: string = path.extname(fileSpec);
+  return (imageFileExtensions.includes(extension));
+}
+
 export const getJsonFromFile = async (filePath: string): Promise<any> => {
   const readFileStream: fs.ReadStream = openReadStream(filePath);
   const fileContents: string = await readStream(readFileStream);
