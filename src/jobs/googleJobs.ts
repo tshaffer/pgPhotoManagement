@@ -133,13 +133,13 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
           productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
           mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),
           creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
-          width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width),
-          height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height),
+          width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
+          height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
           orientation: null,
           description: null,
           gpsPosition: null,
           geoData: valueOrNull(takeoutMetadata.geoData),
-          imageViews: valueOrNull(takeoutMetadata.imageViews),
+          imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
           photoTakenTime: valueOrNull(takeoutMetadata.photoTimeTaken),
           title: valueOrNull(takeoutMetadata.title),
@@ -155,10 +155,12 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   console.log('db additions complete');
 }
 
-
-const valueOrNull = (possibleValue: any): any | null => {
+const valueOrNull = (possibleValue: any, convertToNumber: boolean = false): any | null => {
   if (isNil(possibleValue)) {
     return null;
+  }
+  if (convertToNumber) {
+    possibleValue = parseInt(possibleValue);
   }
   return possibleValue;
 }
