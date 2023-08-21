@@ -5,6 +5,7 @@ import path from 'path';
 import { AuthService } from "../auth";
 import { getAuthService } from "../controllers/googlePhotosService";
 import {
+  FilePathToExifTags,
   GoogleAlbum,
   GoogleMediaItem,
   GoogleMediaItemsByIdInstance,
@@ -13,9 +14,10 @@ import {
   StringToStringLUT
 } from "../types";
 import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle, getMediaItemFromGoogle } from "../controllers/googlePhotos";
-import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, writeJsonToFile } from '../utils';
+import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, retrieveExifData, writeJsonToFile } from '../utils';
 import connectDB from "../config/db";
 import { addMediaItemToDb } from "../controllers";
+import { Tags } from "exiftool-vendored";
 
 export let authService: AuthService;
 
@@ -68,13 +70,16 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   console.log(takeoutImageFilePaths.length);
 
   const takeoutMetaDataFilePathsByImageFileName: StringToStringLUT = {};
-  takeoutImageFilePaths.forEach((imageFilePath: string) => {
+  const takeoutExifDataByImageFileName: FilePathToExifTags = {};
+  for (const imageFilePath of takeoutImageFilePaths) {
     const takeoutMetadataFilePath = imageFilePath + '.json';
     const indexOfMetaDataFilePath = takeoutMetaDataFilePaths.indexOf(takeoutMetadataFilePath);
     if (indexOfMetaDataFilePath >= 0) {
       takeoutMetaDataFilePathsByImageFileName[path.basename(imageFilePath)] = takeoutMetadataFilePath;
     }
-  });
+    const exifData: Tags = await retrieveExifData(imageFilePath);
+    takeoutExifDataByImageFileName[path.basename(imageFilePath)] = exifData;
+  };
 
   if (isNil(authService)) {
     authService = await getAuthService();
@@ -102,6 +107,11 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
 
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
+
+        let exifData: Tags | null = null;
+        if (takeoutExifDataByImageFileName.hasOwnProperty(googleFileName)) {
+          exifData = takeoutExifDataByImageFileName[googleFileName];
+        }
 
         console.log('googleMediaItem from album');
         console.log(mediaItemMetadataFromGoogleAlbum);
@@ -135,9 +145,9 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
           creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
           height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
-          orientation: null,
-          description: null,
-          gpsPosition: null,
+          orientation: isNil(exifData) ? null: valueOrNull(exifData.Orientation),
+          description: isNil(exifData) ? null: valueOrNull(exifData.Description),
+          gpsPosition: isNil(exifData) ? null: valueOrNull(exifData.GPSPosition),
           geoData: valueOrNull(takeoutMetadata.geoData),
           imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
@@ -146,7 +156,7 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
           url: valueOrNull(takeoutMetadata.url),
         }
 
-        await addMediaItemToDb(dbMediaItem);      
+        await addMediaItemToDb(dbMediaItem);
 
       }
     }

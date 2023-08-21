@@ -1,7 +1,12 @@
+import { Tags } from "exiftool-vendored";
 import { GoogleMediaItem } from "googleTypes";
 
 export type StringToStringLUT = {
   [key: string]: string;
+}
+
+export interface FilePathToExifTags {
+  [key: string]: Tags;
 }
 
 export type StringToGoogleMediaItem = {
@@ -12,7 +17,7 @@ export enum Jobs {
   BuildGoogleMediaItemsById = 'BuildGoogleMediaItemsById',
   ListGoogleAlbums = 'ListGoogleAlbums',
   GetGoogleAlbum = 'GetGoogleAlbum',
-  AddMediaItemsFromSingleTakeout='AddMediaItemsFromSingleTakeout',
+  AddMediaItemsFromSingleTakeout = 'AddMediaItemsFromSingleTakeout',
 }
 
 export interface PgPhotoManagementConfiguration {
