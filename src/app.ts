@@ -5,7 +5,8 @@ import {
   buildGoogleMediaItemsById,
   googleGetAlbum,
   googleListAlbums,
-  addMediaItemsFromSingleTakeout
+  addMediaItemsFromSingleTakeout,
+  getAllMediaItems
 } from './jobs';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
@@ -51,6 +52,10 @@ async function main() {
       const albumName: string = parameters[0];
       const takeoutFolder: string = parameters[1];
       await addMediaItemsFromSingleTakeout(albumName, takeoutFolder);
+      break;
+    case Jobs.GetAllMediaItems:
+      console.log('GetAllMediaItems');
+      await getAllMediaItems();
       break;
     default:
       debugger;

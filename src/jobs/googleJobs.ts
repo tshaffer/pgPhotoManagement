@@ -16,7 +16,7 @@ import {
 import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle, getMediaItemFromGoogle } from "../controllers/googlePhotos";
 import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, retrieveExifData, writeJsonToFile } from '../utils';
 import connectDB from "../config/db";
-import { addMediaItemToDb } from "../controllers";
+import { addMediaItemToDb, getAllMediaItemsFromDb } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
 export let authService: AuthService;
@@ -48,6 +48,38 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
     googleMediaItemsByIdInstance
   );
 
+}
+
+export const getAllMediaItems = async () => {
+
+  console.log('connect to db');
+  await connectDB();
+
+  const allMediaItems: MediaItem[] = await getAllMediaItemsFromDb();
+
+  console.log('Number of mediaItems retrieved: ' + allMediaItems.length);
+
+  for (const mediaItem of allMediaItems) {
+    //   if (isNil(mediaItem.title) || isNil(mediaItem.fileName)) {
+    //     debugger;
+    //   }
+    //   if (mediaItem.title !== mediaItem.fileName) {
+    //     debugger;
+    //   }
+
+
+    // if (!isNil(mediaItem.photoTakenTime)) {
+    //   const photoTakenTimeDate = new Date();
+    //   photoTakenTimeDate.setTime(parseInt(mediaItem.photoTakenTime.timestamp) * 1000);
+    //   console.log(photoTakenTimeDate.toISOString());
+    //   console.log(mediaItem.creationTime);
+    //   console.log('the same??');
+    // } else {
+    //   debugger;
+    // }
+  }
+
+  console.log('mediaItems check complete');
 }
 
 //  input parameters
@@ -145,13 +177,13 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
           creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
           height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
-          orientation: isNil(exifData) ? null: valueOrNull(exifData.Orientation),
-          description: isNil(exifData) ? null: valueOrNull(exifData.Description),
-          gpsPosition: isNil(exifData) ? null: valueOrNull(exifData.GPSPosition),
+          orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
+          description: isNil(exifData) ? null : valueOrNull(exifData.Description),
+          gpsPosition: isNil(exifData) ? null : valueOrNull(exifData.GPSPosition),
           geoData: valueOrNull(takeoutMetadata.geoData),
           imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
-          photoTakenTime: valueOrNull(takeoutMetadata.photoTimeTaken),
+          photoTakenTime: valueOrNull(takeoutMetadata.photoTakenTime),
           title: valueOrNull(takeoutMetadata.title),
           url: valueOrNull(takeoutMetadata.url),
         }

@@ -26,10 +26,11 @@
         // "--parameters=/Volumes/SHAFFEROTO/Data 8-17-2023/googleMediaItemsById-2.json"
 
 
-        "--job=AddMediaItemsFromSingleTakeout",
-        "--parameters=Takeout 2020",
-        "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 2020",
+        // "--job=AddMediaItemsFromSingleTakeout",
+        // "--parameters=Takeout 2020",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 2020",
 
+        "--job=GetAllMediaItems",
 
       ]
     }
