@@ -2,7 +2,6 @@ export interface GoogleMediaItem {
   id: string;
   filename: string;
   mimeType: string;
-  baseUrl: string;
   productUrl: string;
   mediaMetadata: GoogleMediaMetadata;
 }

@@ -51,36 +51,14 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
 }
 
 export const getAllMediaItems = async () => {
-
   console.log('connect to db');
   await connectDB();
 
   const allMediaItems: MediaItem[] = await getAllMediaItemsFromDb();
 
   console.log('Number of mediaItems retrieved: ' + allMediaItems.length);
-
-  for (const mediaItem of allMediaItems) {
-    //   if (isNil(mediaItem.title) || isNil(mediaItem.fileName)) {
-    //     debugger;
-    //   }
-    //   if (mediaItem.title !== mediaItem.fileName) {
-    //     debugger;
-    //   }
-
-
-    // if (!isNil(mediaItem.photoTakenTime)) {
-    //   const photoTakenTimeDate = new Date();
-    //   photoTakenTimeDate.setTime(parseInt(mediaItem.photoTakenTime.timestamp) * 1000);
-    //   console.log(photoTakenTimeDate.toISOString());
-    //   console.log(mediaItem.creationTime);
-    //   console.log('the same??');
-    // } else {
-    //   debugger;
-    // }
-  }
-
-  console.log('mediaItems check complete');
 }
+
 
 //  input parameters
 //    albumName - corresponding to takeout file
@@ -128,12 +106,12 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   // get the list of media items in the specified album
   const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
 
-  // const properties: any = {};
-
   // iterate through each media item in the album.
   // if it is an image file, see if there is a corresponding entry in the takeout folder
   for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
+
     const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
+
     if (isImageFile(googleFileName)) {
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
 
@@ -151,41 +129,20 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
         console.log('takeoutMetadata');
         console.log(takeoutMetadata);
 
-        // const takeoutMetadataKeys: string[] = Object.keys(takeoutMetadata);
-        // const albumMetadataKeys: string[] = Object.keys(mediaItemInGoogleAlbum);
-
-        // for (const key of takeoutMetadataKeys) {
-        //   checkUnknownKeys(key, properties);
-        //   if (!properties.hasOwnProperty(key)) {
-        //     properties[key] = takeoutMetadata[key];
-        //   }
-        // }
-        // for (const key of albumMetadataKeys) {
-        //   checkUnknownKeys(key, properties);
-        //   if (!properties.hasOwnProperty(key)) {
-        //     properties[key] = (mediaItemInGoogleAlbum as any)[key];
-        //   }
-        // }
-
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
           fileName: mediaItemMetadataFromGoogleAlbum.filename,
           filePath: '',
-          baseUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.baseUrl),
           productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
           mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),
           creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
           height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
           orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
-          description: isNil(exifData) ? null : valueOrNull(exifData.Description),
-          gpsPosition: isNil(exifData) ? null : valueOrNull(exifData.GPSPosition),
+          description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
-          photoTakenTime: valueOrNull(takeoutMetadata.photoTakenTime),
-          title: valueOrNull(takeoutMetadata.title),
-          url: valueOrNull(takeoutMetadata.url),
         }
 
         await addMediaItemToDb(dbMediaItem);
@@ -205,31 +162,6 @@ const valueOrNull = (possibleValue: any, convertToNumber: boolean = false): any 
     possibleValue = parseInt(possibleValue);
   }
   return possibleValue;
-}
-
-const checkUnknownKeys = (key: string, properties: any) => {
-  if (key === 'geoData') {
-    checkKey(key, properties);
-  }
-  if (key === 'geoDataExif') {
-    checkKey(key, properties);
-  }
-  if (key === 'googlePhotosOrigin') {
-    checkKey(key, properties);
-  }
-  if (key === 'people') {
-    checkKey(key, properties);
-  }
-  if (key === 'photoTakenTime') {
-    checkKey(key, properties);
-  }
-}
-
-const checkKey = (key: string, properties: any) => {
-  if (properties.hasOwnProperty(key)) {
-    return;
-  }
-  debugger;
 }
 
 

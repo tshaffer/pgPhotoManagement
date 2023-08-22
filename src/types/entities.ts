@@ -1,8 +1,15 @@
+export interface GeoData {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  latitudeSpan: number;
+  longitudeSpan: number;
+}
+
 export interface MediaItem {
   googleId: string,
   fileName:  string,
   filePath?: string,
-  baseUrl?: string,
   productUrl?: string,
   mimeType?: string,
   creationTime?: string,
@@ -10,11 +17,7 @@ export interface MediaItem {
   height?: number
   orientation?: number,
   description?: string,
-  gpsPosition?: string,
-  geoData?: any,
+  geoData?: GeoData,
   imageViews?: number,
-  people?: any[],
-  photoTakenTime?: any,
-  title?: string,
-  url?: string,
+  people?: string[],
 }
