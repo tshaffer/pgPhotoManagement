@@ -132,6 +132,7 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
           fileName: mediaItemMetadataFromGoogleAlbum.filename,
+          albumId,
           filePath: '',
           productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
           mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),

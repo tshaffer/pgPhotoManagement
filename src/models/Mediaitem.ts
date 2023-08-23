@@ -7,10 +7,10 @@ const MediaitemSchema = new Schema(
   {
     googleId: { type: String, required: true, unique: true },     // album media metadata: id
     fileName: { type: String, required: true },                   // album media metadata: filename
+    albumId: { type: String, required: true },                    // google album that contains this mediaItem
     filePath: { type: String, default: '' },
     productUrl: { type: String },                                 // album media metadata: productUrl - url of photo at photos.google.com
     mimeType: { type: String },                                   // album media metadata: mimeType
-    // mediaMetadata: { type: String, default: '' },              // album media metadata: object with camera information.
     creationTime: { type: String },                               // album media metadata: mediaMetadata.creationTime (string)
                                                                   // or takeout metadata.creationTime (object)
     width: { type: Number },                                      // album media metadata: mediaMetadata.width
@@ -24,7 +24,6 @@ const MediaitemSchema = new Schema(
       longitude: { type: Number },
       longitudeSpan: { type: Number },
     },
-    // googlePhotosOrigin: { type: String, default: ''},
     imageViews: { type: Number, default: 0 },                     // takeout metadata: number
     people: [{                                                    // takeout metadata: people
       name: String, default: ''

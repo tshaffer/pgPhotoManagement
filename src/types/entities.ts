@@ -9,6 +9,7 @@ export interface GeoData {
 export interface MediaItem {
   googleId: string,
   fileName:  string,
+  albumId: string;
   filePath?: string,
   productUrl?: string,
   mimeType?: string,
