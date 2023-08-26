@@ -101,8 +101,8 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   // console.log(googleAlbum);
 
   // const albumId: string = googleAlbum.id;
-  const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
-
+  // const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
+  const albumId: string = 'AEEKk92H41_rvghQJIFmYvp35lHhQfqZFb9-CpABuE6Y8IahAKtEuCUXKs_2QRF_Ixs1Puzamc5y';
   // get the list of media items in the specified album
   const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
 
@@ -172,8 +172,9 @@ export const googleListAlbums = async () => {
     authService = await getAuthService();
   }
 
-  getAllGoogleAlbums(authService);
-
+  const googleAlbums: GoogleAlbum[] = await getAllGoogleAlbums(authService);
+  console.log('googleAlbums');
+  console.log(googleAlbums);
 }
 
 export const googleGetAlbum = async (id: string) => {

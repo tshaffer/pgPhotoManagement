@@ -18,8 +18,9 @@
       "args": [
         
         // "--job=GetGoogleAlbum",
-        // "--parameters=AEEKk93e3K61r9mYHDoVxCAAuQZlDD_bxOGlYnMDSn45ZpFz9BYZNnOrxfkZu-guCML9AfAq2Avt",
-
+        // "--parameters=AEEKk92H41_rvghQJIFmYvp35lHhQfqZFb9-CpABuE6Y8IahAKtEuCUXKs_2QRF_Ixs1Puzamc5y",
+        // // "--parameters=AEEKk93e3K61r9mYHDoVxCAAuQZlDD_bxOGlYnMDSn45ZpFz9BYZNnOrxfkZu-guCML9AfAq2Avt",
+        
         // "--job=ListGoogleAlbums",
 
         // "--job=BuildGoogleMediaItemsById",
@@ -27,8 +28,10 @@
 
 
         "--job=AddMediaItemsFromSingleTakeout",
-        "--parameters=Takeout 2020",
-        "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 2020",
+        // "--parameters=Takeout 2020",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 2020",
+        "--parameters=Selected 1992",
+        "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Selected 1992",
 
         // "--job=GetAllMediaItems",
 
