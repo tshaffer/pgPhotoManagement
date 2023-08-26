@@ -22,7 +22,6 @@ export const getMediaItemsInAlbumFromDb = async (albumId: string): Promise<Media
 
   const mediaItems: MediaItem[] = [];
   const documents: any = await (mediaItemModel as any).find( { albumId }).exec();
-  debugger;
   for (const document of documents) {
     const mediaItem: MediaItem = document.toObject() as MediaItem;
     mediaItem.googleId = document.googleId.toString();

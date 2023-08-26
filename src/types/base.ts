@@ -1,3 +1,4 @@
+import { MediaItem } from "entities";
 import { Tags } from "exiftool-vendored";
 import { GoogleMediaItem } from "googleTypes";
 
@@ -11,6 +12,10 @@ export interface FilePathToExifTags {
 
 export type StringToGoogleMediaItem = {
   [key: string]: GoogleMediaItem;
+}
+
+export type StringToMediaItem = {
+  [key: string]: MediaItem;
 }
 
 export enum Jobs {
