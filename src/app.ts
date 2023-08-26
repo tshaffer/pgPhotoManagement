@@ -5,7 +5,7 @@ import {
   buildGoogleMediaItemsById,
   googleGetAlbum,
   googleListAlbums,
-  addMediaItemsFromSingleTakeout,
+  mergeFromTakeout,
   getAllMediaItems
 } from './jobs';
 
@@ -51,7 +51,7 @@ async function main() {
       }
       const albumName: string = parameters[0];
       const takeoutFolder: string = parameters[1];
-      await addMediaItemsFromSingleTakeout(albumName, takeoutFolder);
+      await mergeFromTakeout(albumName, takeoutFolder);
       break;
     case Jobs.GetAllMediaItems:
       console.log('GetAllMediaItems');

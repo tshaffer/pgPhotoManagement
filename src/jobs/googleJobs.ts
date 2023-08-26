@@ -13,10 +13,28 @@ import {
   MediaItem,
   StringToStringLUT
 } from "../types";
-import { getAllMediaItemsFromGoogle, getAllGoogleAlbums, getGoogleAlbumData, getGoogleAlbumDataByName, getAlbumMediaItemsFromGoogle, getMediaItemFromGoogle } from "../controllers/googlePhotos";
-import { getImageFilePaths, getJsonFilePaths, getJsonFromFile, isImageFile, retrieveExifData, writeJsonToFile } from '../utils';
+import {
+  getAllMediaItemsFromGoogle,
+  getAllGoogleAlbums,
+  getGoogleAlbumData,
+  getGoogleAlbumDataByName,
+  getAlbumMediaItemsFromGoogle,
+  getMediaItemFromGoogle
+} from "../controllers/googlePhotos";
+import {
+  getImageFilePaths,
+  getJsonFilePaths,
+  getJsonFromFile,
+  isImageFile,
+  retrieveExifData,
+  writeJsonToFile
+} from '../utils';
 import connectDB from "../config/db";
-import { addMediaItemToDb, getAllMediaItemsFromDb } from "../controllers";
+import {
+  addMediaItemToDb,
+  getMediaItemsInAlbumFromDb,
+  getAllMediaItemsFromDb
+} from "../controllers";
 import { Tags } from "exiftool-vendored";
 
 export let authService: AuthService;
@@ -60,17 +78,57 @@ export const getAllMediaItems = async () => {
 }
 
 
+// get googleMediaItems for named album
+const getAlbumItems = async (authService: AuthService, albumId: string): Promise<GoogleMediaItem[]> => {
+  const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
+  return googleMediaItemsInAlbum;
+}
+
 //  input parameters
 //    albumName - corresponding to takeout file
 //    takeoutFolder - folder containing metadata for the files retrieved from a single takeout
-export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutFolder: string) => {
+export const mergeFromTakeout = async (albumName: string, takeoutFolder: string) => {
 
-  console.log('addMediaItemsFromSingleTakeout');
+  console.log('mergeFromTakeout');
 
-  console.log('connect to db');
+  // Step 0
+  // connect to db; acquire authService
   await connectDB();
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
 
-  console.log(takeoutFolder);
+  // Step 1
+  // get the google album metadata for named album
+  const googleAlbum: GoogleAlbum | null = await getGoogleAlbumDataByName(authService, albumName);
+  if (isNil(googleAlbum)) {
+    // TEDTODO
+    // if album does not exist, inform user and return
+    return;
+  };
+  const albumId = googleAlbum.id;
+  // const albumId = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
+  // const albumId = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
+
+  // Step 2
+  // get the googleMediaItems for this album
+  const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumItems(authService, albumId);
+
+  // Step 3
+  // Get existing db mediaItems for this album
+  const mediaItemsInDb: MediaItem[] = await getMediaItemsInAlbumFromDb(albumId);
+
+  // Step 4
+  // If there are no mediaItems in the db for this album, add all the mediaItems in the album
+  if (mediaItemsInDb.length === 0) {
+    await addAllMediaItemsFromTakeout(takeoutFolder, googleMediaItemsInAlbum, albumId);
+  } else {
+    debugger;
+  }
+
+}
+
+export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string) => {
 
   // retrieve metadata files and image files from takeout folder
   const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
@@ -91,20 +149,6 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
     takeoutExifDataByImageFileName[path.basename(imageFilePath)] = exifData;
   };
 
-  if (isNil(authService)) {
-    authService = await getAuthService();
-  }
-
-  // get the google album associated with the specified album name
-  // const googleAlbum: GoogleAlbum | null = await getGoogleAlbumDataByName(authService, albumName);
-  // if (isNil(googleAlbum)) { return };
-  // console.log(googleAlbum);
-
-  // const albumId: string = googleAlbum.id;
-  // const albumId: string = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
-  const albumId: string = 'AEEKk92H41_rvghQJIFmYvp35lHhQfqZFb9-CpABuE6Y8IahAKtEuCUXKs_2QRF_Ixs1Puzamc5y';
-  // get the list of media items in the specified album
-  const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
 
   // iterate through each media item in the album.
   // if it is an image file, see if there is a corresponding entry in the takeout folder
@@ -153,6 +197,7 @@ export const addMediaItemsFromSingleTakeout = async (albumName: string, takeoutF
   }
 
   console.log('db additions complete');
+
 }
 
 const valueOrNull = (possibleValue: any, convertToNumber: boolean = false): any | null => {
