@@ -60,6 +60,8 @@ async function main() {
     default:
       debugger;
   }
+
+  console.log('job execution complete');
 }
 
 const getCommandLineArguments = (options: any) => {

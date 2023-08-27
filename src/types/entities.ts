@@ -19,6 +19,5 @@ export interface MediaItem {
   orientation?: number,
   description?: string,
   geoData?: GeoData,
-  imageViews?: number,
   people?: string[],
 }

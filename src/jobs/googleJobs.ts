@@ -1,4 +1,4 @@
-import { isNil } from "lodash";
+import { isNil, isEqual } from "lodash";
 
 import path from 'path';
 
@@ -34,7 +34,9 @@ import connectDB from "../config/db";
 import {
   addMediaItemToDb,
   getMediaItemsInAlbumFromDb,
-  getAllMediaItemsFromDb
+  getAllMediaItemsFromDb,
+  updateMediaItemInDb,
+  deleteMediaItemFromDb
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
@@ -188,7 +190,6 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
           description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
-          imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
         }
 
@@ -255,7 +256,6 @@ export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMed
           orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
           description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
-          imageViews: valueOrNull(takeoutMetadata.imageViews, true),
           people: valueOrNull(takeoutMetadata.people),
         }
 
@@ -280,6 +280,11 @@ export const mergeMediaItemsFromAlbumWithDb = async (takeoutFolder: string, goog
     mediaItemInDbByGoogleId[mediaItemInDb.googleId] = mediaItemInDb;
   });
 
+  const takeoutAlbumMediaItemsByGoogleId: StringToMediaItem = {};
+  takeoutAlbumMediaItems.forEach((takeoutAlbumMediaItem: MediaItem) => {
+    takeoutAlbumMediaItemsByGoogleId[takeoutAlbumMediaItem.googleId] = takeoutAlbumMediaItem;
+  });
+
   // iterate through each item in the album / takeout
   // if it doesn't exist in db, add it
   // if it exists in the db, compare it
@@ -290,30 +295,29 @@ export const mergeMediaItemsFromAlbumWithDb = async (takeoutFolder: string, goog
     if (mediaItemInDbByGoogleId.hasOwnProperty(googleIdForTakeoutMediaItem)) {
       // item exists in both - compare
       const mediaItemInDb = mediaItemInDbByGoogleId[googleIdForTakeoutMediaItem];
+      // if mediaItems are different - replace existing; else, do nothing
       if (!mediaItemsIdentical(takeoutAlbumMediaItem, mediaItemInDb)) {
-        // mediaItems are different - replace existing
         console.log('not identical');
+        updateMediaItemInDb(takeoutAlbumMediaItem);
       }
     } else {
-      // item doesn't exist in db - add it
-      debugger;
+      // item doesn't exist in db; add it.
+      await addMediaItemToDb(takeoutAlbumMediaItem);
     }
   }
 
-  debugger;
-
   // iterate through each item in the db
-  // if it doesn't in the album / takeout, remove it from the db
-
+  //    if it doesn't in the album / takeout, remove it from the db
+  for (const mediaItemInDb of mediaItemsInDb) {
+    if (!takeoutAlbumMediaItemsByGoogleId.hasOwnProperty(mediaItemInDb.googleId)) {
+      deleteMediaItemFromDb(mediaItemInDb);
+    }
+  }
 }
 
-const mediaItemsIdentical = (mediaItem1: MediaItem, mediaItem2: MediaItem): boolean => {
-  debugger;
-  const mediaItem1Str = JSON.stringify(mediaItem1);
-  const mediaItem2Str = JSON.stringify(mediaItem2);
-  const same: boolean = mediaItem1Str == mediaItem2Str;
-  console.log(same);
-  return false;
+const mediaItemsIdentical = (mediaItemFromTakeout: MediaItem, mediaItemFromDb: MediaItem): boolean => {
+  delete (mediaItemFromDb as any)._id;
+  return isEqual(mediaItemFromTakeout, mediaItemFromDb);
 }
 
 const valueOrNull = (possibleValue: any, convertToNumber: boolean = false): any | null => {

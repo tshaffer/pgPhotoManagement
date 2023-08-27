@@ -21,7 +21,7 @@ export const getMediaItemsInAlbumFromDb = async (albumId: string): Promise<Media
   const mediaItemModel = getMediaitemModel();
 
   const mediaItems: MediaItem[] = [];
-  const documents: any = await (mediaItemModel as any).find( { albumId }).exec();
+  const documents: any = await (mediaItemModel as any).find({ albumId }).exec();
   for (const document of documents) {
     const mediaItem: MediaItem = document.toObject() as MediaItem;
     mediaItem.googleId = document.googleId.toString();
@@ -55,3 +55,16 @@ export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {
   }
 };
 
+export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> => {
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItem.googleId };
+  const updatedDoc = await mediaItemModel.findOneAndUpdate(filter, mediaItem, {
+    new: true,
+  }).exec();
+};
+
+export const deleteMediaItemFromDb = async (mediaItem: MediaItem): Promise<any> => {
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItem.googleId };
+  await mediaItemModel.deleteOne(filter);
+}

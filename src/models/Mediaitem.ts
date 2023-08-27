@@ -24,7 +24,6 @@ const MediaitemSchema = new Schema(
       longitude: { type: Number },
       longitudeSpan: { type: Number },
     },
-    imageViews: { type: Number, default: 0 },                     // takeout metadata: number
     people: [{                                                    // takeout metadata: people
       name: String, default: ''
     }],
