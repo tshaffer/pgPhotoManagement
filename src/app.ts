@@ -6,7 +6,8 @@ import {
   googleGetAlbum,
   googleListAlbums,
   mergeFromTakeout,
-  getAllMediaItems
+  getAllMediaItems,
+  downloadGooglePhotos
 } from './jobs';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
@@ -26,6 +27,13 @@ async function main() {
   const { job, parameters } = getCommandLineArguments(options);
 
   switch (options.job) {
+    case Jobs.DownloadGooglePhotos:
+      console.log('DownloadGooglePhotos');
+      if (parameters.length !== 1) {
+        debugger;
+      }
+      await downloadGooglePhotos(parameters[0]);
+      break;
     case Jobs.BuildGoogleMediaItemsById:
       console.log('BuildGoogleMediaItemsById');
       if (parameters.length !== 1) {

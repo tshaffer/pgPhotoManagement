@@ -12,6 +12,7 @@ export interface MediaItem {
   albumId: string;
   filePath?: string,
   productUrl?: string,
+  baseUrl?: string,
   mimeType?: string,
   creationTime?: string,
   width?: number,

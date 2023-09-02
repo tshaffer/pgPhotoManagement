@@ -19,6 +19,7 @@ export type StringToMediaItem = {
 }
 
 export enum Jobs {
+  DownloadGooglePhotos = 'DownloadGooglePhotos',
   BuildGoogleMediaItemsById = 'BuildGoogleMediaItemsById',
   ListGoogleAlbums = 'ListGoogleAlbums',
   GetGoogleAlbum = 'GetGoogleAlbum',

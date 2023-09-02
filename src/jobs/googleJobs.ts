@@ -1,6 +1,7 @@
 import { isNil, isEqual } from "lodash";
 
 import path from 'path';
+import * as fs from 'fs-extra';
 
 import { AuthService } from "../auth";
 import { getAuthService } from "../controllers/googlePhotosService";
@@ -20,7 +21,8 @@ import {
   getGoogleAlbumData,
   getGoogleAlbumDataByName,
   getAlbumMediaItemsFromGoogle,
-  getMediaItemFromGoogle
+  getMediaItemFromGoogle,
+  GooglePhotoAPIs
 } from "../controllers/googlePhotos";
 import {
   getImageFilePaths,
@@ -36,11 +38,74 @@ import {
   getMediaItemsInAlbumFromDb,
   getAllMediaItemsFromDb,
   updateMediaItemInDb,
-  deleteMediaItemFromDb
+  deleteMediaItemFromDb,
+  downloadMediaItems,
+  downloadMediaItemsMetadata
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
 export let authService: AuthService;
+
+export const downloadGooglePhotos = async (mediaItemsDir: string) => {
+
+  const mediaItemsToDownload: MediaItem[] = [];
+
+  await connectDB();
+
+  const mediaItems: MediaItem[] = await getAllMediaItems();
+  for (const mediaItem of mediaItems) {
+    const filePath = mediaItem.filePath;
+    if (isNil(filePath) || filePath.length === 0 || (!fs.existsSync(filePath))) {
+      mediaItemsToDownload.push(mediaItem);
+    }
+  }
+
+  const mediaItemGoogleIds: string[] = mediaItems.map((mediaItem: MediaItem) => {
+    return mediaItem.googleId;
+  });
+
+  // const groups: string[][] = createGroups(mediaItemGoogleIds, GooglePhotoAPIs.BATCH_GET_LIMIT);
+  // console.log(groups);
+
+  const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
+  console.log(mediaItemGroups);
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  const miniMediaItemGroups: MediaItem[][] = [mediaItemGroups[0], mediaItemGroups[1]];
+  await Promise.all(
+    miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
+      return downloadMediaItemsMetadata(authService, mediaItems);
+    }
+  ));
+  
+  // const googleMediaItemGroups: GoogleMediaItem[][] = await Promise.all(groups.map((sliceIds: any) => {
+  //   return downloadMediaItemsMetadata(authService, sliceIds);
+  // }));
+
+  downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
+
+  return Promise.resolve();
+}
+
+function createGroups(mediaItems: MediaItem[], groupSize: number): MediaItem[][] {
+
+  const groups: MediaItem[][] = [];
+
+  const numOfGroups = Math.ceil(mediaItems.length / groupSize);
+  for (let i = 0; i < numOfGroups; i++) {
+    const startIdx = i * groupSize;
+    const endIdx = i * groupSize + groupSize;
+
+    const subItems: MediaItem[] = mediaItems.slice(startIdx, endIdx);
+    groups.push(subItems);
+  }
+
+  return groups;
+}
+
 
 
 export const buildGoogleMediaItemsById = async (filePath: string) => {
@@ -71,13 +136,15 @@ export const buildGoogleMediaItemsById = async (filePath: string) => {
 
 }
 
-export const getAllMediaItems = async () => {
+export const getAllMediaItems = async (): Promise<MediaItem[]> => {
   console.log('connect to db');
   await connectDB();
 
   const allMediaItems: MediaItem[] = await getAllMediaItemsFromDb();
 
   console.log('Number of mediaItems retrieved: ' + allMediaItems.length);
+
+  return allMediaItems;
 }
 
 
@@ -183,6 +250,7 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           albumId,
           filePath: '',
           productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
+          baseUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.baseUrl),
           mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),
           creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),

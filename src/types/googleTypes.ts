@@ -3,6 +3,7 @@ export interface GoogleMediaItem {
   filename: string;
   mimeType: string;
   productUrl: string;
+  baseUrl: string;
   mediaMetadata: GoogleMediaMetadata;
 }
 
@@ -35,6 +36,7 @@ export interface GoogleAlbum {
   title: string;
   mediaItemsCount: string;
   productUrl: string;
+  baseUrl: string;
   coverPhotoBaseUrl: string;
   coverPhotoMediaItemId: string;
 }

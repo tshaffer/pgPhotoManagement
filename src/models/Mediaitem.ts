@@ -10,6 +10,7 @@ const MediaitemSchema = new Schema(
     albumId: { type: String, required: true },                    // google album that contains this mediaItem
     filePath: { type: String, default: '' },
     productUrl: { type: String },                                 // album media metadata: productUrl - url of photo at photos.google.com
+    baseUrl: { type: String },                                    // album media metadata: baseUrl - tmp url for downloading content
     mimeType: { type: String },                                   // album media metadata: mimeType
     creationTime: { type: String },                               // album media metadata: mediaMetadata.creationTime (string)
                                                                   // or takeout metadata.creationTime (object)

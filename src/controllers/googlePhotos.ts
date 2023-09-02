@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { GoogleAlbum, GoogleMediaItem } from "../types";
 import { AuthService } from "../auth";
@@ -165,19 +165,20 @@ export const getGoogleAlbumData = async (authService: AuthService, albumId: stri
 
   const response: any = await getRequest(authService, url);
 
-  const { coverPhotoBaseUrl, coverPhotoMediaItemId, id, mediaItemsCount, productUrl, title } = response;
+  const { coverPhotoBaseUrl, coverPhotoMediaItemId, id, mediaItemsCount, productUrl, baseUrl, title } = response;
   const googleAlbum: GoogleAlbum = {
     coverPhotoBaseUrl,
     coverPhotoMediaItemId,
     id,
     mediaItemsCount,
     productUrl,
+    baseUrl,
     title,
   }
   return googleAlbum;
 }
 
-const getRequest = async (authService: AuthService, url: string) => {
+export const getRequest = async (authService: AuthService, url: string): Promise<any> => {
 
   const headers = await getHeaders(authService);
 
@@ -230,7 +231,7 @@ const postRequest = async (authService: AuthService, url: string, data: any) => 
     });
 
 }
-const getHeaders = async (authService: AuthService) => {
+export const getHeaders = async (authService: AuthService) => {
   const authToken = await authService.getToken();
   return {
     'Content-Type': 'application/json',
