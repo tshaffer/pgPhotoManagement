@@ -2,22 +2,24 @@ import * as path from 'path';
 import * as fse from 'fs-extra';
 
 import { MediaItem } from "entities";
-import { request } from "express";
+import request from 'request';
 import { isNil } from "lodash";
 import { AuthService } from "../auth";
 import { fsLocalFolderExists, fsCreateNestedDirectory } from "../utils";
 import { GooglePhotoAPIs, getHeaders, getRequest } from "./googlePhotos";
 
-export const downloadMediaItems = async (authService: AuthService, mediaItemGroups:  MediaItem[][], mediaItemsDir: string): Promise<any> => {
+export const downloadMediaItems = async (authService: AuthService, mediaItemGroups: MediaItem[][], mediaItemsDir: string): Promise<any> => {
   for (const mediaItemGroup of mediaItemGroups) {
-    for (const mediaItem of mediaItemGroup) {
-      const retVal: any = await (downloadMediaItem(authService, mediaItem, mediaItemsDir));
-      console.log(retVal);
-      if (retVal.valid) {
-        // googleMediaItem.filePath = retVal.where;
-        // await updateMediaItemInDb(googleMediaItem);
-      } else {
-        debugger;
+    if (!isNil(mediaItemGroup)) {
+      for (const mediaItem of mediaItemGroup) {
+        const retVal: any = await (downloadMediaItem(authService, mediaItem, mediaItemsDir));
+        console.log(retVal);
+        if (retVal.valid) {
+          // googleMediaItem.filePath = retVal.where;
+          // await updateMediaItemInDb(googleMediaItem);
+        } else {
+          debugger;
+        }
       }
     }
   }
@@ -46,10 +48,16 @@ const downloadMediaItem = async (authService: AuthService, mediaItem: MediaItem,
 
 const createDownloadStream = async (authService: AuthService, mediaItem: MediaItem) => {
   // const headers = await getHeaders(authService);
+  // const url: string = await createDownloadUrl(mediaItem);
+
+  // // return request(url, { headers });
+  // return getRequest(authService, url);
+
+  const headers = await getHeaders(authService);
   const url: string = await createDownloadUrl(mediaItem);
 
-  // return request(url, { headers });
-  return getRequest(authService, url);
+  return request(url, { headers });
+
 };
 
 
@@ -112,37 +120,42 @@ export const getShardedDirectory = async (mediaItemsDir: string, useCache: boole
 
 export const downloadMediaItemsMetadata = async (authService: AuthService, mediaItems: MediaItem[]): Promise<void> => {
 
-  const mediaItemsById: any = {};
-  for (const mediaItem of mediaItems) {
-    mediaItemsById[mediaItem.googleId] = mediaItem;
-  }
+  if (!isNil(mediaItems)) {
 
-  let url = `${GooglePhotoAPIs.mediaItems}:batchGet?`;
-
-  mediaItems.forEach((mediaItem: MediaItem) => {
-    const mediaItemId = mediaItem.googleId;
-    url += `mediaItemIds=${mediaItemId}&`;
-  });
-
-  const result: any = await getRequest(authService, url);
-
-  const mediaItemResults: any[] = result.mediaItemResults;
-
-  for (const mediaItemResult of mediaItemResults) {
-    const googleId = mediaItemResult.mediaItem.id;
-    if (!mediaItemsById.hasOwnProperty(googleId)) {
-      debugger;
+    const mediaItemsById: any = {};
+    for (const mediaItem of mediaItems) {
+      mediaItemsById[mediaItem.googleId] = mediaItem;
     }
-    const mediaItem: MediaItem = mediaItemsById[googleId];
-    mediaItem.baseUrl = mediaItemResult.mediaItem.baseUrl;
-    mediaItem.productUrl = mediaItemResult.mediaItem.productUrl;
-    mediaItem.baseUrl = mediaItemResult.mediaItem.baseUrl;
+
+    let url = `${GooglePhotoAPIs.mediaItems}:batchGet?`;
+
+    mediaItems.forEach((mediaItem: MediaItem) => {
+      const mediaItemId = mediaItem.googleId;
+      url += `mediaItemIds=${mediaItemId}&`;
+    });
+
+    const result: any = await getRequest(authService, url);
+
+    const mediaItemResults: any[] = result.mediaItemResults;
+
+    for (const mediaItemResult of mediaItemResults) {
+      const googleId = mediaItemResult.mediaItem.id;
+      if (!mediaItemsById.hasOwnProperty(googleId)) {
+        debugger;
+      }
+      const mediaItem: MediaItem = mediaItemsById[googleId];
+      mediaItem.baseUrl = mediaItemResult.mediaItem.baseUrl;
+      mediaItem.productUrl = mediaItemResult.mediaItem.productUrl;
+      mediaItem.baseUrl = mediaItemResult.mediaItem.baseUrl;
+    }
+
+    // const googleMediaItems: GoogleMediaItem[] = mediaItemResults.map((mediaItemResult: any) => {
+    //   return mediaItemResult.mediaItem;
+    // });
+
+    // return googleMediaItems;
+
   }
 
-  // const googleMediaItems: GoogleMediaItem[] = mediaItemResults.map((mediaItemResult: any) => {
-  //   return mediaItemResult.mediaItem;
-  // });
-
-  // return googleMediaItems;
 };
 
