@@ -6,7 +6,8 @@ import request from 'request';
 import { isNil } from "lodash";
 import { AuthService } from "../auth";
 import { fsLocalFolderExists, fsCreateNestedDirectory } from "../utils";
-import { GooglePhotoAPIs, getHeaders, getRequest } from "./googlePhotos";
+import { GooglePhotoAPIs } from "./googlePhotos";
+import { getHeaders, getRequest } from './googleUtils';
 
 export const downloadMediaItems = async (authService: AuthService, mediaItemGroups: MediaItem[][], mediaItemsDir: string): Promise<any> => {
   for (const mediaItemGroup of mediaItemGroups) {
