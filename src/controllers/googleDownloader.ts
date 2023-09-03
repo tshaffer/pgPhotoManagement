@@ -8,6 +8,7 @@ import { AuthService } from "../auth";
 import { fsLocalFolderExists, fsCreateNestedDirectory } from "../utils";
 import { GooglePhotoAPIs } from "./googlePhotos";
 import { getHeaders, getRequest } from './googleUtils';
+import { updateMediaItemInDb } from './dbInterface';
 
 export const downloadMediaItems = async (authService: AuthService, mediaItemGroups: MediaItem[][], mediaItemsDir: string): Promise<any> => {
   for (const mediaItemGroup of mediaItemGroups) {
@@ -16,8 +17,8 @@ export const downloadMediaItems = async (authService: AuthService, mediaItemGrou
         const retVal: any = await (downloadMediaItem(authService, mediaItem, mediaItemsDir));
         console.log(retVal);
         if (retVal.valid) {
-          // googleMediaItem.filePath = retVal.where;
-          // await updateMediaItemInDb(googleMediaItem);
+          mediaItem.filePath = retVal.where;
+          await updateMediaItemInDb(mediaItem);
         } else {
           debugger;
         }
