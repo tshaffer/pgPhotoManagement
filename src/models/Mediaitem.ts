@@ -30,7 +30,7 @@ const MediaitemSchema = new Schema(
     }],
 
     // https://stackoverflow.com/questions/35509611/mongoose-save-array-of-strings
-    tags: [String]
+    tagIds: [String]
   }
 );
 

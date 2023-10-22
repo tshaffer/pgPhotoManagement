@@ -1,4 +1,4 @@
-import { isNil, isEqual } from "lodash";
+import { isNil, isEqual, isString } from "lodash";
 
 import path from 'path';
 import * as fs from 'fs-extra';
@@ -225,11 +225,12 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
   };
 
 
-  // first pass - gather all people; generate tags.
+  // first pass - gather all people and descriptions; generate tags.
 
   // iterate through each media item in the album.
 
-  const tagNames: Set<string> = new Set<string>();
+  const personTagNames: Set<string> = new Set<string>();
+  const userTagNames: Set<string> = new Set<string>();
 
   for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
     const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
@@ -237,17 +238,33 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
+        
         if (!isNil(takeoutMetadata.people)) {
           takeoutMetadata.people.forEach((person: any) => {
-            tagNames.add(person.name);
+            personTagNames.add(person.name);
           });
+        }
+
+        if (isString(takeoutMetadata.description)) {
+          const description: string = takeoutMetadata.description;
+          if (description.startsWith('TedTags-')) {
+            const tagsSpec: string = description.substring('TedTags-'.length);
+            const tagLabels: string[] = tagsSpec.split(':');
+            tagLabels.forEach((tagLabel: string) => {
+              userTagNames.add(tagLabel);
+            });
+          }
         }
       }
     }
   }
 
-  if (tagNames.size > 0) {
-    await (addTagsSetToDb(tagNames));
+  if (personTagNames.size > 0) {
+    await (addTagsSetToDb('autoPerson', personTagNames));
+  }
+
+  if (userTagNames.size > 0) {
+    await(addTagsSetToDb('user', userTagNames));
   }
 
   const tags: Tag[] = await getAllTagsFromDb();
@@ -278,14 +295,26 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
         console.log('takeoutMetadata');
         console.log(takeoutMetadata);
 
-        // generate tags from people
+        // generate tags from people and description
         const tagIds: string[] = [];
+
         if (!isNil(takeoutMetadata.people)) {
           takeoutMetadata.people.forEach((person: any) => {
             const name: string = person.name;
             // get tagId from name
             tagIds.push(tagIdByTagLabel[name]);
           })
+        }
+
+        if (isString(takeoutMetadata.description)) {
+          const description: string = takeoutMetadata.description;
+          if (description.startsWith('TedTags-')) {
+            const tagsSpec: string = description.substring('TedTags-'.length);
+            const tagLabels: string[] = tagsSpec.split(':');
+            tagLabels.forEach((tagLabel: string) => {
+              tagIds.push(tagIdByTagLabel[tagLabel]);
+            });
+          }
         }
 
         // generate mediaItem tags from people
@@ -301,7 +330,9 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
           height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
           orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
-          description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
+          // description from exifData or from takeoutMetadata? - I'm not sure that what's below makes sense.
+          // description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
+          description: valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
           tagIds,
@@ -368,7 +399,8 @@ export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMed
           width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
           height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
           orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
-          description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
+          // description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
+          description: valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
           tagIds: [],

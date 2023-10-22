@@ -74,7 +74,7 @@ export const deleteMediaItemFromDb = async (mediaItem: MediaItem): Promise<any> 
   await mediaItemModel.deleteOne(filter);
 }
 
-export const addTagsSetToDb = async (tagsSet: Set<string>): Promise<void> => {
+export const addTagsSetToDb = async (type: string, tagsSet: Set<string>): Promise<void> => {
 
   const existingTags = await getAllTagsFromDb();
   const existingTagNames: string[] = existingTags.map((aTag: Tag) => {
@@ -89,7 +89,7 @@ export const addTagsSetToDb = async (tagsSet: Set<string>): Promise<void> => {
       tagsToAddToDb.push({
         id: uuidv4(),
         label: tag,
-        type: 'autoPerson',
+        type,
       });
     }
   }
