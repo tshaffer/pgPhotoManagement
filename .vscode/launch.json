@@ -27,16 +27,14 @@
         // "--parameters=/Volumes/SHAFFEROTO/Data 8-17-2023/googleMediaItemsById-2.json"
 
 
-        // "--job=AddMediaItemsFromSingleTakeout",
-        // "--parameters=Selected 1992",
-        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 1992",
-        // // // "--parameters=Takeout 2020",
-        // // // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Takeout 2020",
+        "--job=AddMediaItemsFromSingleTakeout",
+        "--parameters=takeoutMini2001",
+        "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/takeoutMini2001",
 
         // "--job=GetAllMediaItems",
 
-        "--job=DownloadGooglePhotos",
-        "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
+        // "--job=DownloadGooglePhotos",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
 
       ]
     }

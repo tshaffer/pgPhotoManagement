@@ -13,7 +13,8 @@ import {
   IdToGoogleMediaItemArray,
   MediaItem,
   StringToMediaItem,
-  StringToStringLUT
+  StringToStringLUT,
+  Tag
 } from "../types";
 import {
   getAllMediaItemsFromGoogle,
@@ -40,7 +41,9 @@ import {
   updateMediaItemInDb,
   deleteMediaItemFromDb,
   downloadMediaItems,
-  downloadMediaItemsMetadata
+  downloadMediaItemsMetadata,
+  addTagsSetToDb,
+  getAllTagsFromDb,
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
@@ -79,8 +82,8 @@ export const downloadGooglePhotos = async (mediaItemsDir: string) => {
     miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
       return downloadMediaItemsMetadata(authService, mediaItems);
     }
-  ));
-  
+    ));
+
   // const googleMediaItemGroups: GoogleMediaItem[][] = await Promise.all(groups.map((sliceIds: any) => {
   //   return downloadMediaItemsMetadata(authService, sliceIds);
   // }));
@@ -194,6 +197,7 @@ export const mergeFromTakeout = async (albumName: string, takeoutFolder: string)
     await addAllMediaItemsFromTakeout(takeoutFolder, googleMediaItemsInAlbum, albumId);
   } else {
     // There are existing mediaItems in the db for this album. Compare the existing mediaItems in the db with the mediaItems in the album (and the takeout)
+    debugger; // need to add support for converting people to tags, etc.
     await mergeMediaItemsFromAlbumWithDb(takeoutFolder, googleMediaItemsInAlbum, albumId, mediaItemsInDb);
   }
 
@@ -221,7 +225,37 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
   };
 
 
+  // first pass - gather all people; generate tags.
+
   // iterate through each media item in the album.
+
+  const tagNames: Set<string> = new Set<string>();
+
+  for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
+    const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
+    if (isImageFile(googleFileName)) {
+      if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
+        const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
+        const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
+        if (!isNil(takeoutMetadata.people)) {
+          takeoutMetadata.people.forEach((person: any) => {
+            tagNames.add(person.name);
+          });
+        }
+      }
+    }
+  }
+
+  if (tagNames.size > 0) {
+    await (addTagsSetToDb(tagNames));
+  }
+
+  const tags: Tag[] = await getAllTagsFromDb();
+  const tagIdByTagLabel: StringToStringLUT = {};
+  tags.forEach((tag: Tag) => {
+    tagIdByTagLabel[tag.label] = tag.id;
+  })
+
   // if it is an image file, see if there is a corresponding entry in the takeout folder
   for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
 
@@ -244,6 +278,17 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
         console.log('takeoutMetadata');
         console.log(takeoutMetadata);
 
+        // generate tags from people
+        const tagIds: string[] = [];
+        if (!isNil(takeoutMetadata.people)) {
+          takeoutMetadata.people.forEach((person: any) => {
+            const name: string = person.name;
+            // get tagId from name
+            tagIds.push(tagIdByTagLabel[name]);
+          })
+        }
+
+        // generate mediaItem tags from people
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
           fileName: mediaItemMetadataFromGoogleAlbum.filename,
@@ -259,6 +304,7 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
+          tagIds,
         }
 
         await addMediaItemToDb(dbMediaItem);
@@ -325,6 +371,7 @@ export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMed
           description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
+          tagIds: [],
         }
 
         mediaItems.push(mediaItem);

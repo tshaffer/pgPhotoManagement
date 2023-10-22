@@ -13,7 +13,7 @@ const MediaitemSchema = new Schema(
     baseUrl: { type: String },                                    // album media metadata: baseUrl - tmp url for downloading content
     mimeType: { type: String },                                   // album media metadata: mimeType
     creationTime: { type: String },                               // album media metadata: mediaMetadata.creationTime (string)
-                                                                  // or takeout metadata.creationTime (object)
+    // or takeout metadata.creationTime (object)
     width: { type: Number },                                      // album media metadata: mediaMetadata.width
     height: { type: Number },                                     // album media metadata: mediaMetadata.height
     orientation: { type: Number, default: 0 },                    // exif - orientation - number
@@ -28,6 +28,9 @@ const MediaitemSchema = new Schema(
     people: [{                                                    // takeout metadata: people
       name: String, default: ''
     }],
+
+    // https://stackoverflow.com/questions/35509611/mongoose-save-array-of-strings
+    tags: [String]
   }
 );
 

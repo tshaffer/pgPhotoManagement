@@ -6,6 +6,12 @@ export interface GeoData {
   longitudeSpan: number;
 }
 
+export interface Tag {
+  id: string,
+  label: string,
+  type: string,
+}
+
 export interface MediaItem {
   googleId: string,
   fileName:  string,
@@ -21,4 +27,5 @@ export interface MediaItem {
   description?: string,
   geoData?: GeoData,
   people?: string[],
+  tagIds: string[],
 }
