@@ -306,17 +306,6 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           })
         }
 
-        if (isString(takeoutMetadata.description)) {
-          const description: string = takeoutMetadata.description;
-          if (description.startsWith('TedTags-')) {
-            const tagsSpec: string = description.substring('TedTags-'.length);
-            const tagLabels: string[] = tagsSpec.split(':');
-            tagLabels.forEach((tagLabel: string) => {
-              tagIds.push(tagIdByTagLabel[tagLabel]);
-            });
-          }
-        }
-
         // generate mediaItem tags from people
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
