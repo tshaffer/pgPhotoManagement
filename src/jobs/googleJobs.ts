@@ -42,7 +42,7 @@ import {
   deleteMediaItemFromDb,
   downloadMediaItems,
   downloadMediaItemsMetadata,
-  addTagsSetToDb,
+  addAutoPersonTagsToDb,
   getAllTagsFromDb,
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
@@ -88,7 +88,7 @@ export const downloadGooglePhotos = async (mediaItemsDir: string) => {
   //   return downloadMediaItemsMetadata(authService, sliceIds);
   // }));
 
-  downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
+  await downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
 
   return Promise.resolve();
 }
@@ -238,34 +238,34 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
-        
+
         if (!isNil(takeoutMetadata.people)) {
           takeoutMetadata.people.forEach((person: any) => {
             personTagNames.add(person.name);
           });
         }
 
-        if (isString(takeoutMetadata.description)) {
-          const description: string = takeoutMetadata.description;
-          if (description.startsWith('TedTags-')) {
-            const tagsSpec: string = description.substring('TedTags-'.length);
-            const tagLabels: string[] = tagsSpec.split(':');
-            tagLabels.forEach((tagLabel: string) => {
-              userTagNames.add(tagLabel);
-            });
-          }
-        }
+        // if (isString(takeoutMetadata.description)) {
+        //   const description: string = takeoutMetadata.description;
+        //   if (description.startsWith('TedTags-')) {
+        //     const tagsSpec: string = description.substring('TedTags-'.length);
+        //     const tagLabels: string[] = tagsSpec.split(':');
+        //     tagLabels.forEach((tagLabel: string) => {
+        //       userTagNames.add(tagLabel);
+        //     });
+        //   }
+        // }
       }
     }
   }
 
   if (personTagNames.size > 0) {
-    await (addTagsSetToDb('autoPerson', personTagNames));
+    await (addAutoPersonTagsToDb(personTagNames));
   }
 
-  if (userTagNames.size > 0) {
-    await(addTagsSetToDb('user', userTagNames));
-  }
+  // if (userTagNames.size > 0) {
+  //   await(addTagsSetToDb('user', userTagNames));
+  // }
 
   const tags: Tag[] = await getAllTagsFromDb();
   const tagIdByTagLabel: StringToStringLUT = {};

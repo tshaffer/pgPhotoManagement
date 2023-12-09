@@ -35,6 +35,12 @@ const downloadMediaItem = async (authService: AuthService, mediaItem: MediaItem,
   const baseDir: string = await getShardedDirectory(mediaItemsDir, false, mediaItem.googleId);
   const where = path.join(baseDir, fileName);
 
+  // if file exists at 'where', don't redownload
+  if (fse.existsSync(where)) {
+    const ret: any = { valid: true, where, mediaItem };
+    return Promise.resolve(ret);
+  }
+
   const stream = await createDownloadStream(authService, mediaItem);
   return new Promise((resolve, reject) => {
     stream.pipe(fse.createWriteStream(where)

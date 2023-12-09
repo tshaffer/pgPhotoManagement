@@ -74,7 +74,7 @@ export const deleteMediaItemFromDb = async (mediaItem: MediaItem): Promise<any> 
   await mediaItemModel.deleteOne(filter);
 }
 
-export const addTagsSetToDb = async (type: string, tagsSet: Set<string>): Promise<void> => {
+export const addAutoPersonTagsToDb = async (tagsSet: Set<string>): Promise<void> => {
 
   const existingTags = await getAllTagsFromDb();
   const existingTagNames: string[] = existingTags.map((aTag: Tag) => {
@@ -84,13 +84,17 @@ export const addTagsSetToDb = async (type: string, tagsSet: Set<string>): Promis
 
   const tagsToAddToDb: Tag[] = [];
 
-  for (let tag of tagsSet) {
-    if (!existingTagsSet.has(tag)) {
-      tagsToAddToDb.push({
+  for (let tagLabel of tagsSet) {
+    if (!existingTagsSet.has(tagLabel)) {
+      const tag: Tag = {
         id: uuidv4(),
-        label: tag,
-        type,
-      });
+        label: tagLabel,
+        type: 'autoPerson',
+        // TEDTODO
+        avatarId: '430b3cf0-33e7-4e72-a85b-c65e865ed66a',
+        avatarType: 'app',
+      };
+      tagsToAddToDb.push(tag);
     }
   }
 
@@ -125,8 +129,8 @@ export const getAllTagsFromDb = async (): Promise<Tag[]> => {
   const documents: any = await (tagModel as any).find().exec();
   for (const document of documents) {
     const tag: Tag = document.toObject() as Tag;
-    tag.id = document.id.toString();
-    tag.label = document.label.toString();
+    tag.id = document.id.toString();  // TEDTODO - doesn't appear necessary
+    tag.label = document.label.toString();  // TEDTODO - doesn't appear necessary
     tags.push(tag);
   }
   return tags;

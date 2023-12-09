@@ -10,6 +10,8 @@ export interface Tag {
   id: string,
   label: string,
   type: string,
+  avatarType: string;
+  avatarId: string;
 }
 
 export interface MediaItem {
