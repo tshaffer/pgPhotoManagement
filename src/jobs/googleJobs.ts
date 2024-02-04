@@ -229,15 +229,6 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   };
 
 
-  // get information to assign keywords to media items
-  // let peopleKeywordNodeId = '';
-  // const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
-  // keywordNodes.forEach((keywordNode: KeywordNode) => {
-  //   if (keywordNode.nodeId === 'peopleKeywordNodeId') {
-  //     peopleKeywordNodeId = keywordNode.nodeId;
-  //   }
-  // });
-
   // first pass - gather all people and descriptions; generate tags; generate keywords`
 
   // iterate through each media item in the album.
@@ -252,27 +243,11 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
-
-        // const addPeopleKeywordPromises: Promise<string>[] = [];
-
         if (!isNil(takeoutMetadata.people)) {
-
           takeoutMetadata.people.forEach((person: any) => {
-
             personTagNames.add(person.name);
             personKeywordNames.add(person.name);
-
-            // const peopleKeyword: Keyword = {
-            //   keywordId: 'people',
-            //   label: person.name,
-            //   type: 'appKeyword',
-            // };
-            // const addPeopleKeywordPromise: Promise<string> = createKeywordDocument(peopleKeyword);
-            // addPeopleKeywordPromises.push(addPeopleKeywordPromise);
-
           });
-
-
         }
 
         // if (isString(takeoutMetadata.description)) {
@@ -343,7 +318,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           takeoutMetadata.people.forEach((person: any) => {
             
             const name: string = person.name;
-            
+
             // get tagId from name
             tagIds.push(tagIdByTagLabel[name]);
 

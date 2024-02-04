@@ -7,7 +7,7 @@ const KeywordSchema = new Schema(
   {
     keywordId: { type: String, required: true, unique: true },
     label: { type: String, required: true, unique: true },
-    type: { type: String, required: true, unique: true },
+    type: { type: String, required: true },
   }
 );
 

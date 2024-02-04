@@ -604,6 +604,18 @@ export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
 
 export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<void> => {
 
+  let peopleKeywordNode: KeywordNode = null;
+  const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
+  keywordNodes.forEach((keywordNode: KeywordNode) => {
+    if (keywordNode.nodeId === 'peopleKeywordNodeId') {
+      peopleKeywordNode = keywordNode;
+      return;
+    }
+  });
+  if (isNil(peopleKeywordNode)) {
+    throw new Error('peopleKeywordNode not found');
+  }
+
   const existingKeywords: Keyword[] = await getKeywordsFromDb();
   const existingKeywordNames: string[] = existingKeywords.map((aKeyword: Keyword) => {
     return aKeyword.label;
@@ -630,15 +642,40 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
         .then((retVal: any) => {
           console.log('keywords added successfully');
           console.log(retVal);
-          return;
+
+          const createKeywordNodePromises: Promise<string>[] = [];
+
+          const keywords: Keyword[] = retVal.ops;
+          keywords.forEach((keyword: Keyword) => {
+            const keywordNode: KeywordNode = {
+              nodeId: uuidv4(),
+              keywordId: keyword.keywordId,
+              parentNodeId: 'peopleKeywordNodeId',
+              childrenNodeIds: [],
+            };
+            createKeywordNodePromises.push(createKeywordNodeDocument(keywordNode));
+          });
+          Promise.all(createKeywordNodePromises)
+            .then((keywordNodeIds: string[]) => {
+
+              console.log(keywordNodeIds);
+
+              keywordNodeIds.forEach((keywordNodeId: string) => {
+                peopleKeywordNode.childrenNodeIds.push(keywordNodeId);
+              });
+              updateKeywordNodeDocument(peopleKeywordNode);
+
+              return;
+            });
         })
         .catch((error: any) => {
           console.log('db add error: ', error);
-          if (error.code === 11000) {
-            return;
-          } else {
-            debugger;
-          }
+          debugger;
+          // if (error.code === 11000) {
+          //   return;
+          // } else {
+          //   debugger;
+          // }
         });
     } catch (error: any) {
       debugger;

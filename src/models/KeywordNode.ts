@@ -8,8 +8,8 @@ mongoose.Schema.Types.String.checkRequired(v => typeof v === 'string');
 const KeywordNodeSchema = new Schema(
   {
     nodeId: { type: String, required: true, unique: true },
-    keywordId: { type: String, required: true, unique: true },
-    parentNodeId: { type: String, required: true, unique: true },
+    keywordId: { type: String, required: true },
+    parentNodeId: { type: String, required: true },
     childrenNodeIds: [String],
   }
 );
