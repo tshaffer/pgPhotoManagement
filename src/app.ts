@@ -7,7 +7,8 @@ import {
   googleListAlbums,
   mergeFromTakeout,
   getAllMediaItems,
-  downloadGooglePhotos
+  downloadGooglePhotos,
+  initializeKeywordCollections
 } from './jobs';
 
 readConfig('/Users/tedshaffer/Documents/Projects/pgPhotoManagement/src/config/config.env');
@@ -64,6 +65,10 @@ async function main() {
     case Jobs.GetAllMediaItems:
       console.log('GetAllMediaItems');
       await getAllMediaItems();
+      break;
+    case Jobs.InitializeKeywordCollections:
+      console.log('InitializeKeywordCollections');
+      await initializeKeywordCollections();
       break;
     default:
       debugger;

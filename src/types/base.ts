@@ -25,6 +25,7 @@ export enum Jobs {
   GetGoogleAlbum = 'GetGoogleAlbum',
   AddMediaItemsFromSingleTakeout = 'AddMediaItemsFromSingleTakeout',
   GetAllMediaItems = 'GetAllMediaItems',
+  InitializeKeywordCollections = 'InitializeKeywordCollections'
 }
 
 export interface PgPhotoManagementConfiguration {

@@ -11,6 +11,8 @@ import {
   GoogleMediaItem,
   GoogleMediaItemsByIdInstance,
   IdToGoogleMediaItemArray,
+  Keyword,
+  KeywordNode,
   MediaItem,
   StringToMediaItem,
   StringToStringLUT,
@@ -44,6 +46,9 @@ import {
   downloadMediaItemsMetadata,
   addAutoPersonTagsToDb,
   getAllTagsFromDb,
+  createKeywordDocument,
+  createKeywordNodeDocument,
+  updateKeywordNodeDocument,
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
@@ -109,8 +114,6 @@ function createGroups(mediaItems: MediaItem[], groupSize: number): MediaItem[][]
   return groups;
 }
 
-
-
 export const buildGoogleMediaItemsById = async (filePath: string) => {
 
   if (isNil(authService)) {
@@ -149,7 +152,6 @@ export const getAllMediaItems = async (): Promise<MediaItem[]> => {
 
   return allMediaItems;
 }
-
 
 // get googleMediaItems for named album
 const getAlbumItems = async (authService: AuthService, albumId: string): Promise<GoogleMediaItem[]> => {
@@ -489,3 +491,45 @@ export const googleGetAlbum = async (id: string) => {
 
 }
 
+export const initializeKeywordCollections = async () => {
+
+  console.log('initializeKeywordCollections');
+
+  await connectDB();
+
+  const rootKeyword: Keyword = {
+    keywordId: 'root',
+    label: 'All',
+    type: 'appKeyword',
+  };
+  const rootKeywordId: string = await createKeywordDocument(rootKeyword);
+  
+  const peopleKeyword: Keyword = {
+    keywordId: 'people',
+    label: 'People',
+    type: 'appKeyword',
+  };
+  const peopleKeywordId: string = await createKeywordDocument(peopleKeyword);
+  
+  const rootKeywordNode: KeywordNode = {
+    nodeId: 'rootKeywordNodeId',
+    keywordId: rootKeywordId,
+    parentNodeId: '',
+    childrenNodeIds: [],
+  };
+  const rootKeywordNodeId: string = await createKeywordNodeDocument(rootKeywordNode);
+
+  const peopleKeywordNode: KeywordNode = {
+    nodeId: 'peopleKeywordNodeId',
+    keywordId: peopleKeywordId,
+    parentNodeId: rootKeywordNodeId,
+    childrenNodeIds: [],
+  };
+  const peopleKeywordNodeId: string = await createKeywordNodeDocument(peopleKeywordNode);
+
+  // add peopleKeywordNode as child to rootKeywordNode
+  rootKeywordNode.childrenNodeIds.push(peopleKeywordNodeId);
+  await updateKeywordNodeDocument(rootKeywordNode);
+  
+  console.log('initializeKeywordCollections complete');
+}

@@ -11,6 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
+      "outputCapture": "std",
       "program": "${workspaceFolder}/dist/app.js",
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
@@ -28,13 +29,15 @@
         // "--parameters=Year 2014",
         // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Year 2014",
 
-        "--job=DownloadGooglePhotos",
-        // "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
-        "--parameters=/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images",
+        // "--job=DownloadGooglePhotos",
+        // // "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
+        // "--parameters=/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images",
 
         // "--job=AddMediaItemsFromSingleTakeout",
         // "--parameters=Year 2021",
         // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Year 2021",
+
+        "--job=InitializeKeywordCollections",
       ]
     }
   ]

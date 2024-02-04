@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Document } from 'mongoose';
 import { getTagModel } from "../models/Tag";
-import { 
-  getKeywordModel, 
-  getKeywordNodeModel, 
-  getKeywordTreeModel, 
+import {
+  getKeywordModel,
+  getKeywordNodeModel,
+  getKeywordTreeModel,
   getMediaitemModel,
 } from "../models";
 import {
@@ -594,15 +594,23 @@ export const createKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
     });
 }
 
-export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> => {
-  const keywordTreeModel = getKeywordTreeModel();
-  return keywordTreeModel.create({ rootNodeId })
-    .then((keywordTreeDocument: any) => {
-      return Promise.resolve();
-    }).catch((err: any) => {
-      return Promise.reject(err);
-    });
+export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promise<any> => {
+  const keywordNodeModel = getKeywordNodeModel();
+  const filter = { nodeId: keywordNode.nodeId };
+  const updatedDoc = await keywordNodeModel.findOneAndUpdate(filter, keywordNode, {
+    new: true,
+  }).exec();
 }
+
+// export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> => {
+//   const keywordTreeModel = getKeywordTreeModel();
+//   return keywordTreeModel.create({ rootNodeId })
+//     .then((keywordTreeDocument: any) => {
+//       return Promise.resolve();
+//     }).catch((err: any) => {
+//       return Promise.reject(err);
+//     });
+// }
 
 
 
