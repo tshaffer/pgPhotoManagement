@@ -49,6 +49,8 @@ import {
   createKeywordDocument,
   createKeywordNodeDocument,
   updateKeywordNodeDocument,
+  addAutoPersonKeywordsToDb,
+  getKeywordsFromDb,
 } from "../controllers";
 import { Tags } from "exiftool-vendored";
 
@@ -205,7 +207,7 @@ export const mergeFromTakeout = async (albumName: string, takeoutFolder: string)
 
 }
 
-export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string) => {
+const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string) => {
 
   // retrieve metadata files and image files from takeout folder
   const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
@@ -227,12 +229,22 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
   };
 
 
-  // first pass - gather all people and descriptions; generate tags.
+  // get information to assign keywords to media items
+  // let peopleKeywordNodeId = '';
+  // const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
+  // keywordNodes.forEach((keywordNode: KeywordNode) => {
+  //   if (keywordNode.nodeId === 'peopleKeywordNodeId') {
+  //     peopleKeywordNodeId = keywordNode.nodeId;
+  //   }
+  // });
+
+  // first pass - gather all people and descriptions; generate tags; generate keywords`
 
   // iterate through each media item in the album.
 
   const personTagNames: Set<string> = new Set<string>();
-  const userTagNames: Set<string> = new Set<string>();
+  const personKeywordNames: Set<string> = new Set<string>();
+  // const userTagNames: Set<string> = new Set<string>();
 
   for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
     const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
@@ -241,10 +253,26 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
 
+        // const addPeopleKeywordPromises: Promise<string>[] = [];
+
         if (!isNil(takeoutMetadata.people)) {
+
           takeoutMetadata.people.forEach((person: any) => {
+
             personTagNames.add(person.name);
+            personKeywordNames.add(person.name);
+
+            // const peopleKeyword: Keyword = {
+            //   keywordId: 'people',
+            //   label: person.name,
+            //   type: 'appKeyword',
+            // };
+            // const addPeopleKeywordPromise: Promise<string> = createKeywordDocument(peopleKeyword);
+            // addPeopleKeywordPromises.push(addPeopleKeywordPromise);
+
           });
+
+
         }
 
         // if (isString(takeoutMetadata.description)) {
@@ -264,6 +292,10 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
   if (personTagNames.size > 0) {
     await (addAutoPersonTagsToDb(personTagNames));
   }
+  if (personKeywordNames.size > 0) {
+    await (addAutoPersonKeywordsToDb(personKeywordNames));
+  }
+
 
   // if (userTagNames.size > 0) {
   //   await(addTagsSetToDb('user', userTagNames));
@@ -273,6 +305,12 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
   const tagIdByTagLabel: StringToStringLUT = {};
   tags.forEach((tag: Tag) => {
     tagIdByTagLabel[tag.label] = tag.id;
+  })
+
+  const keywords: Keyword[] = await getKeywordsFromDb();
+  const keywordIdByKeywordLabel: StringToStringLUT = {};
+  keywords.forEach((keyword: Keyword) => {
+    keywordIdByKeywordLabel[keyword.label] = keyword.keywordId;
   })
 
   // if it is an image file, see if there is a corresponding entry in the takeout folder
@@ -299,12 +337,17 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
 
         // generate tags from people and description
         const tagIds: string[] = [];
+        const keywordIds: string[] = [];
 
         if (!isNil(takeoutMetadata.people)) {
           takeoutMetadata.people.forEach((person: any) => {
+            
             const name: string = person.name;
+            
             // get tagId from name
             tagIds.push(tagIdByTagLabel[name]);
+
+            keywordIds.push(keywordIdByKeywordLabel[name]);
           })
         }
 
@@ -327,6 +370,7 @@ export const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleM
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
           tagIds,
+          keywordIds,
         }
 
         await addMediaItemToDb(dbMediaItem);
@@ -395,6 +439,7 @@ export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMed
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
           tagIds: [],
+          keywordIds: [],
         }
 
         mediaItems.push(mediaItem);
@@ -503,14 +548,14 @@ export const initializeKeywordCollections = async () => {
     type: 'appKeyword',
   };
   const rootKeywordId: string = await createKeywordDocument(rootKeyword);
-  
+
   const peopleKeyword: Keyword = {
     keywordId: 'people',
     label: 'People',
     type: 'appKeyword',
   };
   const peopleKeywordId: string = await createKeywordDocument(peopleKeyword);
-  
+
   const rootKeywordNode: KeywordNode = {
     nodeId: 'rootKeywordNodeId',
     keywordId: rootKeywordId,
@@ -530,6 +575,6 @@ export const initializeKeywordCollections = async () => {
   // add peopleKeywordNode as child to rootKeywordNode
   rootKeywordNode.childrenNodeIds.push(peopleKeywordNodeId);
   await updateKeywordNodeDocument(rootKeywordNode);
-  
+
   console.log('initializeKeywordCollections complete');
 }

@@ -30,6 +30,7 @@ export interface MediaItem {
   geoData?: GeoData,
   people?: string[],
   tagIds: string[],
+  keywordIds: string[],
 }
 
 export enum TagSelectorType {

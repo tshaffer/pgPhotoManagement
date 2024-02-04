@@ -602,6 +602,50 @@ export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
   }).exec();
 }
 
+export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<void> => {
+
+  const existingKeywords: Keyword[] = await getKeywordsFromDb();
+  const existingKeywordNames: string[] = existingKeywords.map((aKeyword: Keyword) => {
+    return aKeyword.label;
+  })
+  const existingKeywordsSet: Set<string> = new Set<string>(existingKeywordNames);
+
+  const keywordsToAddToDb: Keyword[] = [];
+
+  for (let keywordLabel of keywordsSet) {
+    if (!existingKeywordsSet.has(keywordLabel)) {
+      const keyword: Keyword = {
+        keywordId: uuidv4(),
+        label: keywordLabel,
+        type: 'autoPerson',
+      };
+      keywordsToAddToDb.push(keyword);
+    }
+  }
+
+  if (keywordsToAddToDb.length > 0) {
+    const keywordModel = getKeywordModel();
+    try {
+      return keywordModel.collection.insertMany(keywordsToAddToDb)
+        .then((retVal: any) => {
+          console.log('keywords added successfully');
+          console.log(retVal);
+          return;
+        })
+        .catch((error: any) => {
+          console.log('db add error: ', error);
+          if (error.code === 11000) {
+            return;
+          } else {
+            debugger;
+          }
+        });
+    } catch (error: any) {
+      debugger;
+    }
+  }
+}
+
 // export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> => {
 //   const keywordTreeModel = getKeywordTreeModel();
 //   return keywordTreeModel.create({ rootNodeId })
