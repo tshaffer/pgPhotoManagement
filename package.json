@@ -4,6 +4,7 @@
   "description": "Ted's photo management software",
   "main": "dist/app.js",
   "scripts": {
+    "build": "./node_modules/typescript/bin/tsc",
     "build-ts": "tsc",
     "start": "npm run app"
   },

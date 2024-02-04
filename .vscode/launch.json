@@ -16,26 +16,25 @@
         "${workspaceFolder}/dist/**/*.js"
       ],
       "args": [
-        
         // "--job=GetGoogleAlbum",
         // "--parameters=AEEKk92H41_rvghQJIFmYvp35lHhQfqZFb9-CpABuE6Y8IahAKtEuCUXKs_2QRF_Ixs1Puzamc5y",
         // // "--parameters=AEEKk93e3K61r9mYHDoVxCAAuQZlDD_bxOGlYnMDSn45ZpFz9BYZNnOrxfkZu-guCML9AfAq2Avt",
-        
         // "--job=ListGoogleAlbums",
-
         // "--job=BuildGoogleMediaItemsById",
         // "--parameters=/Volumes/SHAFFEROTO/Data 8-17-2023/googleMediaItemsById-2.json"
-
-
         // "--job=GetAllMediaItems",
-
+        
         // "--job=AddMediaItemsFromSingleTakeout",
-        // "--parameters=AMini2001",
-        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/AMini2001",
+        // "--parameters=Year 2014",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Year 2014",
 
         "--job=DownloadGooglePhotos",
-        "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/GoogleMediaItems",
+        "--parameters=/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images",
 
+        // "--job=AddMediaItemsFromSingleTakeout",
+        // "--parameters=Year 2021",
+        // "--parameters=/Users/tedshaffer/Documents/pgData/Takeouts/Takeout/Year 2021",
       ]
     }
   ]
